@@ -33,7 +33,7 @@ router_users = APIRouter(
     "",
     response_model=UserSchema,
     status_code=status.HTTP_200_OK,
-    summary="Insert user",
+    summary="Create user",
     responses={
         status.HTTP_409_CONFLICT: {
             "description": "User already exists"
@@ -63,7 +63,7 @@ def set_user(user_in: Annotated[UserSchema, Form()]):
             "description": "Server Error",
         }
     },
-    dependencies=[Depends(authenticate)]
+    dependencies=[Depends(authenticate)],
 )
 def get_user():
     try:
@@ -86,6 +86,7 @@ def get_user():
             "description": "Server Error",
         }
     },
+    dependencies=[Depends(authenticate)],
 )
 def put_user(user_in: Annotated[UserRead, Form()]):
     try:
@@ -110,6 +111,7 @@ def put_user(user_in: Annotated[UserRead, Form()]):
             "description": "Server Error",
         }
     },
+    dependencies=[Depends(authenticate)],
 )
 def del_user(id: Annotated[int, Form()]):
     try:

@@ -61,6 +61,7 @@ class User(Base):
         return UserRead(
             id=self.id,
             login=self.login,
+            password=self.password_hash,
             first_name=self.first_name,
             last_name=self.last_name,
             email=self.email,

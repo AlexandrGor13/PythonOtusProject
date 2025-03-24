@@ -8,18 +8,26 @@ class User(BaseModel):
         max_length=15,
         description="Логин пользователя, от 3 до 15 символов",
     )]
+    password: Annotated[str, Field(
+        min_length=8,
+        max_length=20,
+        description="Пароль пользователя, от 8 до 20 символов"
+    )]
     email: Annotated[EmailStr, Field(
         description="Электронная почта пользователя"
     )]
     first_name: Annotated[str, Field(
+        min_length=1,
         max_length=50,
-        description="Имя пользователя, до 50 символов"
+        description="Имя пользователя, от 1 до 50 символов"
     )] = ""
     last_name: Annotated[str, Field(
+        min_length=1,
         max_length=50,
-        description="Фамилия пользователя, до 50 символов"
+        description="Фамилия пользователя, от 1 до 50 символов"
     )] = ""
     phone: Annotated[str, Field(
+        min_length=5,
         max_length=15,
         description="Номер телефона в международном формате, начинающийся с '+'"
     )]

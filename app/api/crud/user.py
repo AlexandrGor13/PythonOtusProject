@@ -9,9 +9,10 @@ from app.models import (
 )
 
 
-def create_user(login, first_name, last_name, email, phone):
+def create_user(login, password, first_name, last_name, email, phone):
     user = User(
         login=login,
+        password_hash=password,
         first_name=first_name,
         last_name=last_name,
         email=email,
