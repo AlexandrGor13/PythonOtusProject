@@ -10,6 +10,7 @@ python = "^3.12"
 fastapi = {extras = ["all"], version = "^0.115.11"}
 alembic = "^1.15.1"
 pg8000 = "^1.31.2"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 
 
 [tool.poetry.group.dev.dependencies]

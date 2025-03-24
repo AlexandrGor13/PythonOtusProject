@@ -9,8 +9,10 @@ from sqlalchemy.exc import (
 )
 
 from app.schemas import (
-    User as UserSchema,
-    UserRead
+    User,
+    UserRead,
+    UserUpdate,
+    UserBase
 )
 from typing import Annotated
 
@@ -31,7 +33,7 @@ router_users = APIRouter(
 
 @router_users.post(
     "",
-    response_model=UserSchema,
+    response_model=User,
     status_code=status.HTTP_200_OK,
     summary="Create user",
     responses={
@@ -43,19 +45,19 @@ router_users = APIRouter(
         },
     },
 )
-def set_user(user_in: Annotated[UserSchema, Form()]):
+def set_user(user_in: Annotated[User, Form()]):
     try:
-        create_user(**user_in.__dict__)
+        user = create_user(**user_in.__dict__)
     except InterfaceError:
         return JSONResponse(status_code=500, content={"detail": "Server Error"})
     except IntegrityError:
         return JSONResponse(status_code=409, content={"detail": "User already exists"})
-    return JSONResponse(content=jsonable_encoder(user_in))
+    return JSONResponse(content=jsonable_encoder(user))
 
 
 @router_users.get(
     "",
-    response_model=UserSchema,
+    response_model=UserRead,
     status_code=status.HTTP_200_OK,
     summary="Get users",
     responses={
@@ -75,7 +77,7 @@ def get_user():
 
 @router_users.put(
     "",
-    response_model=UserSchema,
+    response_model=UserRead,
     status_code=status.HTTP_200_OK,
     summary="Update user",
     responses={
@@ -88,7 +90,7 @@ def get_user():
     },
     dependencies=[Depends(authenticate)],
 )
-def put_user(user_in: Annotated[UserRead, Form()]):
+def put_user(user_in: Annotated[UserUpdate, Form()]):
     try:
         user = update_user(**user_in.model_dump())
     except NoResultFound:
@@ -100,7 +102,7 @@ def put_user(user_in: Annotated[UserRead, Form()]):
 
 @router_users.delete(
     "",
-    response_model=UserSchema,
+    response_model=UserRead,
     status_code=status.HTTP_200_OK,
     summary="Delete user",
     responses={

@@ -10,7 +10,7 @@ from sqlalchemy.orm import (
 )
 
 from .db import Base
-from app.schemas.user import UserRead
+from app.schemas.user import UserRead, UserBase
 
 if TYPE_CHECKING:
     from .order import Order
@@ -61,9 +61,13 @@ class User(Base):
         return UserRead(
             id=self.id,
             login=self.login,
-            password=self.password_hash,
+            # password=self.password_hash,
             first_name=self.first_name,
             last_name=self.last_name,
             email=self.email,
             phone=self.phone,
         )
+
+    @property
+    def get_login_password(self):
+        return {"login": self.login, "password": self.password_hash}

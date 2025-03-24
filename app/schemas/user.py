@@ -2,16 +2,11 @@ from pydantic import BaseModel, Field, EmailStr
 from typing import Annotated
 
 
-class User(BaseModel):
+class UserBase(BaseModel):
     login: Annotated[str, Field(
         min_length=3,
         max_length=15,
         description="Логин пользователя, от 3 до 15 символов",
-    )]
-    password: Annotated[str, Field(
-        min_length=8,
-        max_length=20,
-        description="Пароль пользователя, от 8 до 20 символов"
     )]
     email: Annotated[EmailStr, Field(
         description="Электронная почта пользователя"
@@ -33,8 +28,19 @@ class User(BaseModel):
     )]
 
 
-class UserRead(User):
+class User(UserBase):
+    password: Annotated[str, Field(
+        min_length=8,
+        max_length=60,
+        description="Пароль пользователя, от 8 до 20 символов"
+    )]
+
+
+class UserRead(UserBase):
     id: Annotated[int, Field(
         ge=1,
         description="Идентификатор пользователя"
     )]
+
+class UserUpdate(UserRead, User):
+    pass
