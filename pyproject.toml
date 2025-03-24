@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "otusproject"
+version = "0.1.0"
+description = ""
+authors = ["alexandr <gorbenich@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = {extras = ["all"], version = "^0.115.11"}
+alembic = "^1.15.1"
+pg8000 = "^1.31.2"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
