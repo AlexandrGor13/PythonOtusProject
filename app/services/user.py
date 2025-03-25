@@ -1,5 +1,6 @@
-from app.api.crud.hash_pw import hash_password
 from sqlalchemy.orm import Session
+from app.core.hashing import pwd_context
+from app.schemas.user import UserRead
 from app.models import (
     engine,
     User,
@@ -10,10 +11,10 @@ from app.models import (
 )
 
 
-def create_user(login, password, first_name, last_name, email, phone):
+def create_user(login: str, password: str, first_name: str, last_name: str, email: str, phone: str):
     user = User(
         login=login,
-        password_hash=hash_password(password),
+        password_hash=pwd_context.hash(password),
         first_name=first_name,
         last_name=last_name,
         email=email,
@@ -22,13 +23,11 @@ def create_user(login, password, first_name, last_name, email, phone):
     with Session(engine) as session:
         try:
             session.add(user)
-            session.flush()
-            user_out = user.get_schemas_user
         except Exception:
             raise
         finally:
             session.commit()
-    return user_out
+    return user
 
 
 def select_user():
@@ -43,9 +42,9 @@ def select_user():
         finally:
             session.commit()
     return users_list
+    
 
-
-def select_user_and_password():
+def select_user_password():
     with Session(engine) as session:
         try:
             users = session.query(User).all()
@@ -59,17 +58,21 @@ def select_user_and_password():
     return users_list
 
 
-def update_user(id, login, password, first_name, last_name, email, phone):
+def update_user(
+    login: str,
+    first_name: str | None = None,
+    last_name: str | None = None,
+    email: str | None = None,
+    phone: str | None = None,
+) -> UserRead:
     with Session(engine) as session:
         try:
-            user_id = session.query(User).filter(User.id == id).one()
-            user_id.login = login
-            user_id.password_hash = hash_password(password)
-            user_id.first_name = first_name
-            user_id.last_name = last_name
-            user_id.email = email
-            user_id.phone = phone
-            user_out = user_id.get_schemas_user
+            user_login = session.query(User).filter(User.login == login).one()
+            if first_name: user_login.first_name = first_name
+            if last_name: user_login.last_name = last_name
+            if email: user_login.email = email
+            if phone: user_login.phone = phone
+            user_out = user_login.get_schemas_user
         except Exception:
             raise
         finally:
@@ -77,12 +80,12 @@ def update_user(id, login, password, first_name, last_name, email, phone):
     return user_out
 
 
-def delete_user(id: int):
+def delete_user(login: str) -> UserRead:
     with Session(engine) as session:
         try:
-            user_id = session.query(User).filter(User.id == id).one()
-            user_out = user_id.get_schemas_user
-            session.delete(user_id)
+            user_login = session.query(User).filter(User.login == login).one()
+            user_out = user_login.get_schemas_user
+            session.delete(user_login)
         except Exception:
             raise
         finally:

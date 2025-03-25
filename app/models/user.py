@@ -10,7 +10,7 @@ from sqlalchemy.orm import (
 )
 
 from .db import Base
-from app.schemas.user import UserRead, UserBase
+from app.schemas.user import UserRead
 
 if TYPE_CHECKING:
     from .order import Order
@@ -23,11 +23,7 @@ class User(Base):
     login: Mapped[str] = mapped_column(
         String(15),
         unique=True
-    )
-    email: Mapped[str] = mapped_column(
-        String(30),
-        unique=True
-    )
+    )    
     password_hash: Mapped[str | None] = mapped_column(
         String(256),
         default=None,
@@ -41,6 +37,10 @@ class User(Base):
         String(50),
         default="",
         server_default="",
+    )
+    email: Mapped[str] = mapped_column(
+        String(30),
+        unique=True
     )
     phone: Mapped[str] = mapped_column(
         String(15),
@@ -59,15 +59,13 @@ class User(Base):
     @property
     def get_schemas_user(self) -> UserRead:
         return UserRead(
-            id=self.id,
             login=self.login,
-            # password=self.password_hash,
             first_name=self.first_name,
             last_name=self.last_name,
             email=self.email,
             phone=self.phone,
         )
-
+        
     @property
-    def get_login_password(self):
-        return {"login": self.login, "password": self.password_hash}
+    def get_login_password(self) -> dict:
+        return {'login': self.login, 'password': self.password_hash}

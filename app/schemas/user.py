@@ -1,46 +1,42 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, field_validator
 from typing import Annotated
 
 
-class UserBase(BaseModel):
+class UserRead(BaseModel):
     login: Annotated[str, Field(
         min_length=3,
         max_length=15,
         description="Логин пользователя, от 3 до 15 символов",
     )]
-    email: Annotated[EmailStr, Field(
-        description="Электронная почта пользователя"
-    )]
     first_name: Annotated[str, Field(
         min_length=1,
         max_length=50,
         description="Имя пользователя, от 1 до 50 символов"
-    )] = ""
+    )]
     last_name: Annotated[str, Field(
         min_length=1,
         max_length=50,
         description="Фамилия пользователя, от 1 до 50 символов"
-    )] = ""
+    )]
+    email: Annotated[EmailStr, Field(
+        description="Электронная почта пользователя"
+    )]
     phone: Annotated[str, Field(
         min_length=5,
         max_length=15,
         description="Номер телефона в международном формате, начинающийся с '+'"
     )]
 
+    # @field_validator('phone')
+    # @classmethod
+    # def check_valid_phone(cls, phone: str):
+    #     if not (phone[1:].isdigit() and phone[0] == '+'):
+    #         raise ValueError('Неправильный ввод.')
 
-class User(UserBase):
+
+class User(UserRead):
     password: Annotated[str, Field(
         min_length=8,
-        max_length=60,
+        max_length=20,
         description="Пароль пользователя, от 8 до 20 символов"
     )]
-
-
-class UserRead(UserBase):
-    id: Annotated[int, Field(
-        ge=1,
-        description="Идентификатор пользователя"
-    )]
-
-class UserUpdate(UserRead, User):
-    pass
