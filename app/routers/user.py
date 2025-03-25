@@ -1,8 +1,9 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Form, status, Depends, HTTPException
+from fastapi import APIRouter, Form, status, Depends, HTTPException, Path
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
+from pydantic import EmailStr
 
 from sqlalchemy.exc import (
     NoResultFound,
@@ -17,7 +18,8 @@ from app.schemas import (
 )
 
 from app.services.user import (
-    select_user,
+    select_users,
+    select_current_user,
     create_user,
     delete_user,
     update_user,
@@ -56,6 +58,32 @@ def set_user(user_in: Annotated[UserSchema, Form()]):
 
 
 @router.get(
+    "/{login}",
+    response_model=UserRead,
+    status_code=status.HTTP_200_OK,
+    summary="Get user",
+    responses={
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Server Error",
+        }
+    },
+)
+def get_user(login: Annotated[str, Path()], current_user: Annotated[str, Depends(auth_user)]):
+    try:
+        if login == current_user or current_user == settings.APP_LOGIN:
+            users = select_current_user(login)
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials",
+                headers={"WWW-Authenticate": "Basic"},
+            )
+    except InterfaceError:
+        return JSONResponse(status_code=500, content={"detail": "Server Error"})
+    return JSONResponse(content=jsonable_encoder(users))
+
+
+@router.get(
     "",
     response_model=UserRead,
     status_code=status.HTTP_200_OK,
@@ -69,14 +97,14 @@ def set_user(user_in: Annotated[UserSchema, Form()]):
 )
 def get_user():
     try:
-        users = select_user()
+        users = select_users()
     except InterfaceError:
         return JSONResponse(status_code=500, content={"detail": "Server Error"})
     return JSONResponse(content=jsonable_encoder(users))
 
 
 @router.put(
-    "",
+    "/{login}",
     response_model=UserRead,
     status_code=status.HTTP_200_OK,
     summary="Update user",
@@ -89,10 +117,23 @@ def get_user():
         }
     },
 )
-def update_user_param(user_in: Annotated[UserRead, Form()], current_user: Annotated[str, Depends(auth_user)]):
+def update_user_param(
+        login: Annotated[str, Path()],
+        first_name: Annotated[str, Form()],
+        last_name: Annotated[str, Form()],
+        email: Annotated[EmailStr, Form()],
+        phone: Annotated[str, Form()],
+        current_user: Annotated[str, Depends(auth_user)]
+):
     try:
-        if user_in.login == current_user or current_user == settings.APP_LOGIN:
-            user = update_user(**user_in.model_dump())
+        if login == current_user or current_user == settings.APP_LOGIN:
+            user = update_user(
+                login=login,
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                phone=phone,
+            )
         else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -107,7 +148,7 @@ def update_user_param(user_in: Annotated[UserRead, Form()], current_user: Annota
 
 
 @router.patch(
-    "",
+    "/{login}",
     response_model=UserRead,
     status_code=status.HTTP_200_OK,
     summary="Update name user",
@@ -121,7 +162,7 @@ def update_user_param(user_in: Annotated[UserRead, Form()], current_user: Annota
     },
 )
 def update_name_user(
-        login: Annotated[str, Form()],
+        login: Annotated[str, Path()],
         first_name: Annotated[str, Form()],
         last_name: Annotated[str, Form()],
         current_user: Annotated[str, Depends(auth_user)],
@@ -129,7 +170,11 @@ def update_name_user(
     try:
 
         if login == current_user or current_user == settings.APP_LOGIN:
-            user = update_user(login, **{'first_name': first_name, 'last_name': last_name})
+            user = update_user(
+                login=login,
+                first_name=first_name,
+                last_name=last_name,
+            )
         else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -144,7 +189,7 @@ def update_name_user(
 
 
 @router.patch(
-    "/contacts",
+    "/{login}/contacts",
     response_model=UserRead,
     status_code=status.HTTP_200_OK,
     summary="Update contact user",
@@ -158,7 +203,7 @@ def update_name_user(
     },
 )
 def update_contact_user(
-        login: Annotated[str, Form()],
+        login: Annotated[str, Path()],
         email: Annotated[str, Form()],
         # email: Annotated[EmailStr, Field(description="Электронная почта пользователя")]
         phone: Annotated[str, Form()],
@@ -167,7 +212,11 @@ def update_contact_user(
     try:
 
         if login == current_user or current_user == settings.APP_LOGIN:
-            user = update_user(login, **{'email': email, 'phone': phone})
+            user = update_user(
+                login=login,
+                email=email,
+                phone=phone,
+            )
         else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -182,7 +231,7 @@ def update_contact_user(
 
 
 @router.delete(
-    "",
+    "/{login}",
     response_model=UserRead,
     status_code=status.HTTP_200_OK,
     summary="Delete user",
@@ -195,7 +244,7 @@ def update_contact_user(
         }
     },
 )
-def del_user(login: Annotated[str, Form()], current_user: Annotated[str, Depends(auth_user)]):
+def del_user(login: Annotated[str, Path()], current_user: Annotated[str, Depends(auth_user)]):
     try:
         if login == current_user or current_user == settings.APP_LOGIN:
             user = delete_user(login)
