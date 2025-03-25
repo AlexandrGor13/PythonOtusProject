@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from sqlalchemy import (
     String,
@@ -46,7 +46,7 @@ class User(Base):
         String(15),
         default="",
     )
-    order: Mapped["Order"] = relationship(
+    order: Mapped[List["Order"]] = relationship(
         back_populates="owner",
     )
     address: Mapped["Address"] = relationship(
