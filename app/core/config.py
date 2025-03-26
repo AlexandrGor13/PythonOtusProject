@@ -34,8 +34,7 @@ class Settings:
 
 settings = Settings()
 
-
 if __name__ == '__main__':
     print(env_path)
-    print(PurePath(Path.cwd()).parents[1] / '.env')
+    print(PurePath(Path.cwd()).parents[1]/'.env')
     print(os.getenv("APP_ADMIN"))
