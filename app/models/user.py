@@ -9,7 +9,7 @@ from sqlalchemy.orm import (
     relationship,
 )
 
-from .db import Base
+from .base import Base
 from app.schemas.user import UserRead
 
 if TYPE_CHECKING:

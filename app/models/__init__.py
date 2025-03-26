@@ -10,7 +10,7 @@ __all__ = (
 
 )
 
-from .db import Base, engine
+from .base import Base, engine
 from .user import User
 from .address import Address
 from .product import Product

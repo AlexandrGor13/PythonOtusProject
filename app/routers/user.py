@@ -29,7 +29,7 @@ from app.dependency import auth_admin, auth_user
 
 router = APIRouter(
     tags=["Users"],
-    prefix="/user"
+    prefix="/users"
 )
 
 
@@ -58,7 +58,7 @@ def set_user(user_in: Annotated[UserSchema, Form()]):
 
 
 @router.get(
-    "/{login}",
+    "/{username}",
     response_model=UserRead,
     status_code=status.HTTP_200_OK,
     summary="Get user",
@@ -68,10 +68,13 @@ def set_user(user_in: Annotated[UserSchema, Form()]):
         }
     },
 )
-def get_user(login: Annotated[str, Path()], current_user: Annotated[str, Depends(auth_user)]):
+def get_user(
+        username: Annotated[str, Path()],
+        current_user: Annotated[dict[str], Depends(auth_user)]
+):
     try:
-        if login == current_user or current_user == settings.APP_LOGIN:
-            users = select_current_user(login)
+        if username == current_user['login'] or current_user['login'] == settings.APP_ADMIN:
+            users = select_current_user(username)
         else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -104,7 +107,7 @@ def get_user():
 
 
 @router.put(
-    "/{login}",
+    "/{username}",
     response_model=UserRead,
     status_code=status.HTTP_200_OK,
     summary="Update user",
@@ -118,17 +121,17 @@ def get_user():
     },
 )
 def update_user_param(
-        login: Annotated[str, Path()],
+        username: Annotated[str, Path()],
         first_name: Annotated[str, Form()],
         last_name: Annotated[str, Form()],
         email: Annotated[EmailStr, Form()],
         phone: Annotated[str, Form()],
-        current_user: Annotated[str, Depends(auth_user)]
+        current_user: Annotated[dict[str], Depends(auth_user)]
 ):
     try:
-        if login == current_user or current_user == settings.APP_LOGIN:
+        if username == current_user['login'] or current_user['login'] == settings.APP_ADMIN:
             user = update_user(
-                login=login,
+                login=username,
                 first_name=first_name,
                 last_name=last_name,
                 email=email,
@@ -148,7 +151,7 @@ def update_user_param(
 
 
 @router.patch(
-    "/{login}",
+    "/{username}",
     response_model=UserRead,
     status_code=status.HTTP_200_OK,
     summary="Update name user",
@@ -162,16 +165,16 @@ def update_user_param(
     },
 )
 def update_name_user(
-        login: Annotated[str, Path()],
+        username: Annotated[str, Path()],
         first_name: Annotated[str, Form()],
         last_name: Annotated[str, Form()],
-        current_user: Annotated[str, Depends(auth_user)],
+        current_user: Annotated[dict[str], Depends(auth_user)],
 ):
     try:
 
-        if login == current_user or current_user == settings.APP_LOGIN:
+        if username == current_user['login'] or current_user['login'] == settings.APP_ADMIN:
             user = update_user(
-                login=login,
+                login=username,
                 first_name=first_name,
                 last_name=last_name,
             )
@@ -189,7 +192,7 @@ def update_name_user(
 
 
 @router.patch(
-    "/{login}/contacts",
+    "/{username}/contacts",
     response_model=UserRead,
     status_code=status.HTTP_200_OK,
     summary="Update contact user",
@@ -203,17 +206,17 @@ def update_name_user(
     },
 )
 def update_contact_user(
-        login: Annotated[str, Path()],
+        username: Annotated[str, Path()],
         email: Annotated[str, Form()],
         # email: Annotated[EmailStr, Field(description="Электронная почта пользователя")]
         phone: Annotated[str, Form()],
-        current_user: Annotated[str, Depends(auth_user)],
+        current_user: Annotated[dict[str], Depends(auth_user)],
 ):
     try:
 
-        if login == current_user or current_user == settings.APP_LOGIN:
+        if username == current_user['login'] or current_user['login'] == settings.APP_ADMIN:
             user = update_user(
-                login=login,
+                login=username,
                 email=email,
                 phone=phone,
             )
@@ -231,7 +234,7 @@ def update_contact_user(
 
 
 @router.delete(
-    "/{login}",
+    "/{username}",
     response_model=UserRead,
     status_code=status.HTTP_200_OK,
     summary="Delete user",
@@ -244,10 +247,13 @@ def update_contact_user(
         }
     },
 )
-def del_user(login: Annotated[str, Path()], current_user: Annotated[str, Depends(auth_user)]):
+def del_user(
+        username: Annotated[str, Path()],
+        current_user: Annotated[dict[str], Depends(auth_user)]
+):
     try:
-        if login == current_user or current_user == settings.APP_LOGIN:
-            user = delete_user(login)
+        if username == current_user['login'] or current_user['login'] == settings.APP_ADMIN:
+            user = delete_user(username)
         else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
