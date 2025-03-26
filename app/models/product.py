@@ -13,7 +13,7 @@ from sqlalchemy.orm import (
     relationship,
 )
 
-from .db import Base
+from .base import Base
 
 if TYPE_CHECKING:
     from .order_items import OrderItem

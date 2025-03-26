@@ -105,5 +105,3 @@ def delete_user(login: str) -> UserRead:
     return user_out
 
 
-if __name__ == '__main__':
-    print(select_current_user('login1').login)
