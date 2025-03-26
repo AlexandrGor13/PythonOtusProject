@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-env_path = Path.cwd() / '.env'
+env_path = Path('..') / '.env'
 
 load_dotenv(dotenv_path=env_path)
 
@@ -12,7 +12,6 @@ class Settings:
     PROJECT_VERSION: str = '1.0.0'
 
     APP_LOGIN = "admin"
-    # APP_ADMIN = os.getenv("APP_ADMIN")
     APP_PASSWORD = "password"
 
     PG_DB = "app_database"
