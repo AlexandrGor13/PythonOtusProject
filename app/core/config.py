@@ -1,18 +1,18 @@
 import os
 from dotenv import load_dotenv
-from pathlib import Path
+from pathlib import Path, PurePath
 
-env_path = Path('..') / '.env'
+env_path = PurePath(Path.cwd()).parents[1]/'.env'
 
 load_dotenv(dotenv_path=env_path)
 
 
 class Settings:
-    PROJECT_NAME: str = 'OtusProject'
-    PROJECT_VERSION: str = '1.0.0'
+    PROJECT_NAME = 'OtusProject'
+    PROJECT_VERSION = '1.0.0'
 
-    APP_LOGIN = "admin"
-    APP_PASSWORD = "password"
+    APP_ADMIN = "admin"
+    APP_PASSWORD = "$2b$12$ykSu89iSKPepZj8rMAd4..5.eRTq.YXDu2azfy/.6nzE50YdTpK9a"
 
     PG_DB = "app_database"
     PG_USER = "app"
@@ -36,5 +36,6 @@ settings = Settings()
 
 
 if __name__ == '__main__':
-    print(settings.SQLA_PG_URL)
     print(env_path)
+    print(PurePath(Path.cwd()).parents[1] / '.env')
+    print(os.getenv("APP_ADMIN"))
