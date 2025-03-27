@@ -52,9 +52,9 @@ def set_user(user_in: Annotated[UserSchema, Form()]):
     try:
         create_user(**user_in.__dict__)
     except InterfaceError:
-        return JSONResponse(status_code=500, content={"detail": "Server Error"})
+        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"detail": "Server Error"})
     except IntegrityError:
-        return JSONResponse(status_code=409, content={"detail": "User already exists"})
+        return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"detail": "User already exists"})
     return JSONResponse(content=jsonable_encoder(user_in))
 
 
@@ -83,7 +83,7 @@ def get_user(
                 headers={"WWW-Authenticate": "Basic"},
             )
     except InterfaceError:
-        return JSONResponse(status_code=500, content={"detail": "Server Error"})
+        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"detail": "Server Error"})
     return JSONResponse(content=jsonable_encoder(users))
 
 
@@ -151,9 +151,9 @@ def update_user_param(
                 headers={"WWW-Authenticate": "Basic"},
             )
     except NoResultFound:
-        return JSONResponse(status_code=404, content={"detail": "User not found"})
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "User not found"})
     except InterfaceError:
-        return JSONResponse(status_code=500, content={"detail": "Server Error"})
+        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"detail": "Server Error"})
     return JSONResponse(content=jsonable_encoder(user))
 
 
@@ -192,9 +192,9 @@ def update_name_user(
                 headers={"WWW-Authenticate": "Basic"},
             )
     except NoResultFound:
-        return JSONResponse(status_code=404, content={"detail": "User not found"})
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "User not found"})
     except InterfaceError:
-        return JSONResponse(status_code=500, content={"detail": "Server Error"})
+        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"detail": "Server Error"})
     return JSONResponse(content=jsonable_encoder(user))
 
 
@@ -234,9 +234,9 @@ def update_contact_user(
                 headers={"WWW-Authenticate": "Basic"},
             )
     except NoResultFound:
-        return JSONResponse(status_code=404, content={"detail": "User not found"})
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "User not found"})
     except InterfaceError:
-        return JSONResponse(status_code=500, content={"detail": "Server Error"})
+        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"detail": "Server Error"})
     return JSONResponse(content=jsonable_encoder(user))
 
 
@@ -268,7 +268,7 @@ def del_user(
                 headers={"WWW-Authenticate": "Basic"},
             )
     except NoResultFound:
-        return JSONResponse(status_code=404, content={"detail": "User not found"})
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "User not found"})
     except InterfaceError:
-        return JSONResponse(status_code=500, content={"detail": "Server Error"})
+        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"detail": "Server Error"})
     return JSONResponse(content=jsonable_encoder(user))
