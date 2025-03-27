@@ -1,7 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Form, status, Depends, HTTPException, Path, Cookie
-from fastapi.params import Cookie
+from fastapi import APIRouter, Form, status, Depends, HTTPException, Path
 from fastapi.responses import JSONResponse, Response
 from fastapi.encoders import jsonable_encoder
 from pydantic import EmailStr
