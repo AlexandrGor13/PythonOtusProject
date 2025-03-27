@@ -1,7 +1,8 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Form, status, Depends, HTTPException, Path
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Form, status, Depends, HTTPException, Path, Cookie
+from fastapi.params import Cookie
+from fastapi.responses import JSONResponse, Response
 from fastapi.encoders import jsonable_encoder
 from pydantic import EmailStr
 
@@ -96,14 +97,20 @@ def get_user(
             "description": "Server Error",
         }
     },
-    dependencies=[Depends(auth_admin)],
+    # dependencies=[Depends(auth_admin)],
 )
-def get_user():
+def get_users(
+        response: JSONResponse,
+        current_user: Annotated[dict[str], Depends(auth_admin)],
+        # last_user: Annotated[dict[str], Cookie()]
+):
     try:
+        response.set_cookie(key=current_user['login'], value=current_user['password'])
         users = select_users()
     except InterfaceError:
-        return JSONResponse(status_code=500, content={"detail": "Server Error"})
-    return JSONResponse(content=jsonable_encoder(users))
+        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"detail": "Server Error"})
+    # response.body = jsonable_encoder(users)
+    return response
 
 
 @router.put(
