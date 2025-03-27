@@ -100,16 +100,16 @@ def get_user(
     # dependencies=[Depends(auth_admin)],
 )
 def get_users(
-        response: JSONResponse,
         current_user: Annotated[dict[str], Depends(auth_admin)],
         # last_user: Annotated[dict[str], Cookie()]
 ):
     try:
-        response.set_cookie(key=current_user['login'], value=current_user['password'])
+
         users = select_users()
     except InterfaceError:
         return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"detail": "Server Error"})
-    # response.body = jsonable_encoder(users)
+    response = JSONResponse(content=jsonable_encoder(users))
+    response.set_cookie(key='last_user', value=str(current_user))
     return response
 
 
