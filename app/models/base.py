@@ -17,7 +17,6 @@ from sqlalchemy.orm import (
 
 )
 
-
 engine = create_engine(
     settings.SQLA_PG_URL,
     echo=settings.SQLA_ECHO,
