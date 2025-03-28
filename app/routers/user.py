@@ -1,3 +1,4 @@
+from pyexpat.errors import messages
 from typing import Annotated
 
 from fastapi import APIRouter, Form, status, Depends, HTTPException, Path
@@ -81,7 +82,7 @@ def get_user(
                 detail="Invalid credentials",
                 headers={"WWW-Authenticate": "Basic"},
             )
-    except InterfaceError:
+    except Exception:
         return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"detail": "Server Error"})
     return JSONResponse(content=jsonable_encoder(users))
 
@@ -105,7 +106,7 @@ def get_users(
     try:
 
         users = select_users()
-    except InterfaceError:
+    except Exception:
         return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"detail": "Server Error"})
     response = JSONResponse(content=jsonable_encoder(users))
     response.set_cookie(key='last_user', value=str(current_user))

@@ -3,25 +3,16 @@ import os
 
 class Settings:
     PROJECT_NAME = 'OtusProject'
-    PROJECT_VERSION = '1.0.0'
+    PROJECT_VERSION = '0.1.0'
 
-    # APP_ADMIN = os.getenv('APP_ADMIN')
-    # APP_PASSWORD = os.getenv('APP_PASSWORD')
+    APP_ADMIN = os.getenv('APP_ADMIN')
+    APP_PASSWORD = os.getenv('APP_PASSWORD')
 
-    # PG_DB = os.getenv('PG_DB')
-    # PG_USER = os.getenv('PG_USER')
-    # PG_PASSWORD = os.getenv('PG_PASSWORD')
-    # PG_HOST = os.getenv('PG_HOST')
-    # PG_PORT = os.getenv('PG_PORT')
-
-    APP_ADMIN = "admin"
-    APP_PASSWORD = "$2b$12$ykSu89iSKPepZj8rMAd4..5.eRTq.YXDu2azfy/.6nzE50YdTpK9a"
-
-    PG_DB = "app_database"
-    PG_USER = "app"
-    PG_PASSWORD = "password"
-    PG_HOST = "localhost"
-    PG_PORT = 5432
+    PG_DB = os.getenv('PG_DB')
+    PG_USER = os.getenv('PG_USER')
+    PG_PASSWORD = os.getenv('PG_PASSWORD')
+    PG_HOST = os.getenv('PG_HOST')
+    PG_PORT = os.getenv('PG_PORT')
 
     SQLA_PG_ENGINE = "pg8000"
     SQLA_PG_URL = f"postgresql+{SQLA_PG_ENGINE}://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DB}"
@@ -34,8 +25,4 @@ class Settings:
         "pk": "pk_%(table_name)s",
     }
 
-
 settings = Settings()
-
-if __name__ == '__main__':
-    print(settings.APP_ADMIN)

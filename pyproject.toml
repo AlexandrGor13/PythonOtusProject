@@ -11,7 +11,8 @@ fastapi = {extras = ["all"], version = "^0.115.11"}
 alembic = "^1.15.1"
 pg8000 = "^1.31.2"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
-python-dotenv = "^1.1.0"
+sqladmin = {extras = ["full"], version = "^0.20.1"}
+loguru = "^0.7.3"
 
 
 [tool.poetry.group.dev.dependencies]
