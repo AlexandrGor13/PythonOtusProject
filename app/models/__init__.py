@@ -1,6 +1,7 @@
 __all__ = (
     "Base",
     "engine",
+    "inspector",
     "User",
     "Address",
     "Product",
@@ -10,7 +11,7 @@ __all__ = (
 
 )
 
-from .base import Base, engine
+from .base import Base, engine, inspector
 from .user import User
 from .address import Address
 from .product import Product

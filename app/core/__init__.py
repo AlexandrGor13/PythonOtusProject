@@ -1,2 +1,2 @@
 from .config import settings
-from .hashing import pwd_context
+from .security import pwd_context

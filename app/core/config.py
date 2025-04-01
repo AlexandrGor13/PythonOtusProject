@@ -7,6 +7,7 @@ class Settings:
 
     APP_ADMIN = os.getenv('APP_ADMIN')
     APP_PASSWORD = os.getenv('APP_PASSWORD')
+    SECRET_KEY = os.getenv('SECRET_KEY')
 
     PG_DB = os.getenv('PG_DB')
     PG_USER = os.getenv('PG_USER')

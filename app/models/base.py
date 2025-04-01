@@ -22,6 +22,8 @@ engine = create_engine(
     echo=settings.SQLA_ECHO,
 )
 
+inspector = inspect(engine)
+
 
 class Base(DeclarativeBase):
     metadata = MetaData(
@@ -64,3 +66,4 @@ class Base(DeclarativeBase):
                 result[column.key] = value
 
         return result
+

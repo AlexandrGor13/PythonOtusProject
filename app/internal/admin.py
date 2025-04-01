@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse
 import secrets
 from app.routers import router
 from app.core.config import settings
-from app.core.hashing import pwd_context
+from app.core.security import pwd_context
 from app.models import *
 
 
@@ -20,71 +20,23 @@ def create_admin(app):
 
 
 class UserAdmin(ModelView, model=User):
-    column_list = [
-        'id',
-        'login',
-        'password_hash'  # Only for admin panel
-        'first_name',
-        'last_name',
-        'email',
-        'phone',
-        'address',
-        'order',
-        'order_items',
-        'created_at',
-        'updated_at',
-    ]
+    column_list = [column['name'] for column in inspector.get_columns(User.__tablename__)]
 
 
 class OrderAdmin(ModelView, model=Order):
-    column_list = [
-        'id',
-        'name',
-        'owner_id',
-        'user',
-        'order_items',
-        'created_at',
-        'updated_at',
-    ]
+    column_list = [column['name'] for column in inspector.get_columns(Order.__tablename__)]
 
 
 class AddressAdmin(ModelView, model=Address):
-    column_list = [
-        'id',
-        'address_tip',
-        'street',
-        'city',
-        'status',
-        'country',
-        'post_index',
-        'created_at',
-        'updated_at',
-    ]
+    column_list = [column['name'] for column in inspector.get_columns(Address.__tablename__)]
 
 
 class ProductAdmin(ModelView, model=Product):
-    column_list = [
-        'id',
-        'name',
-        'description',
-        'price',
-        'quantity',
-        'image_url',
-        'created_at',
-        'updated_at',
-    ]
+    column_list = [column['name'] for column in inspector.get_columns(Product.__tablename__)]
 
 
 class OrderItemAdmin(ModelView, model=OrderItem):
-    column_list = [
-        'id',
-        'order_id',
-        'item_id',
-        'item',
-        'order',
-        'created_at',
-        'updated_at',
-    ]
+    column_list = [column['name'] for column in inspector.get_columns(OrderItem.__tablename__)]
 
 
 class AdminAuth(AuthenticationBackend):
@@ -92,7 +44,6 @@ class AdminAuth(AuthenticationBackend):
         form = await request.form()
         username, password = form["username"], form["password"]
 
-        # Validate username/password credentials
         is_user_ok = secrets.compare_digest(username, settings.APP_ADMIN)
         is_pass_ok = pwd_context.verify(password, settings.APP_PASSWORD)
         if not (is_user_ok and is_pass_ok):

@@ -40,3 +40,8 @@ class User(UserRead):
         max_length=20,
         description="Пароль пользователя, от 8 до 20 символов"
     )]
+
+
+class UserAuth(BaseModel):
+    login: Annotated[str, Field()]
+    password: Annotated[str, Field()]

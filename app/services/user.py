@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.core.hashing import pwd_context
+from app.core.security import pwd_context
 from app.schemas.user import UserRead
 from app.models import (
     engine,
