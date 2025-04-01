@@ -11,9 +11,9 @@ from app.models import (
 )
 
 
-def create_user(login: str, password: str, first_name: str, last_name: str, email: str, phone: str):
+def create_user(username: str, password: str, first_name: str, last_name: str, email: str, phone: str):
     user = User(
-        login=login,
+        username=username,
         password_hash=pwd_context.hash(password),
         first_name=first_name,
         last_name=last_name,
@@ -44,10 +44,10 @@ def select_users():
     return users_list
 
 
-def select_current_user(login: str):
+def select_current_user(username: str):
     with Session(engine) as session:
         try:
-            user = session.query(User).filter(User.login == login).one()
+            user = session.query(User).filter(User.username == username).one()
             user_out = user.get_schemas_user
         except Exception:
             raise
@@ -62,16 +62,17 @@ def select_user_password():
             users = session.query(User).all()
             users_list = []
             for user in users:
-                users_list.append(user.get_login_password)
+                users_list.append(user.get_username_password)
         except Exception:
             raise
         finally:
             session.commit()
+    print(users_list)
     return users_list
 
 
 def update_user(
-        login: str,
+        username: str,
         first_name: str | None = None,
         last_name: str | None = None,
         email: str | None = None,
@@ -79,12 +80,12 @@ def update_user(
 ) -> UserRead:
     with Session(engine) as session:
         try:
-            user_login = session.query(User).filter(User.login == login).one()
-            if first_name: user_login.first_name = first_name
-            if last_name: user_login.last_name = last_name
-            if email: user_login.email = email
-            if phone: user_login.phone = phone
-            user_out = user_login.get_schemas_user
+            user = session.query(User).filter(User.username == username).one()
+            if first_name: user.first_name = first_name
+            if last_name: user.last_name = last_name
+            if email: user.email = email
+            if phone: user.phone = phone
+            user_out = user.get_schemas_user
         except Exception:
             raise
         finally:
@@ -92,12 +93,12 @@ def update_user(
     return user_out
 
 
-def delete_user(login: str) -> UserRead:
+def delete_user(username: str) -> UserRead:
     with Session(engine) as session:
         try:
-            user_login = session.query(User).filter(User.login == login).one()
-            user_out = user_login.get_schemas_user
-            session.delete(user_login)
+            user = session.query(User).filter(User.username == username).one()
+            user_out = user.get_schemas_user
+            session.delete(user)
         except Exception:
             raise
         finally:

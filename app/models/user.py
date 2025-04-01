@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 class User(Base):
     __tablename__ = "users"
 
-    login: Mapped[str] = mapped_column(
+    username: Mapped[str] = mapped_column(
         String(15),
         unique=True
     )    
@@ -59,7 +59,7 @@ class User(Base):
     @property
     def get_schemas_user(self) -> UserRead:
         return UserRead(
-            login=self.login,
+            username=self.username,
             first_name=self.first_name,
             last_name=self.last_name,
             email=self.email,
@@ -67,5 +67,5 @@ class User(Base):
         )
         
     @property
-    def get_login_password(self) -> dict:
-        return {'login': self.login, 'password': self.password_hash}
+    def get_username_password(self) -> dict:
+        return {'username': self.username, 'password_hash': self.password_hash}

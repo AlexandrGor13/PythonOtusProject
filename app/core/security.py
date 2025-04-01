@@ -20,10 +20,10 @@ def create_jwt_token(data: dict):
     """
     Функция для создания JWT токена. Мы копируем входные данные, добавляем время истечения и кодируем токен.
     """
-    to_encode = data.copy()  # Копируем данные, чтобы не изменить исходный словарь
+    payload = data.copy()  # Копируем данные, чтобы не изменить исходный словарь
     expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)  # Задаем время истечения токена
-    to_encode.update({"exp": expire})  # Добавляем время истечения в данные токена
-    return jwt.encode(to_encode, settings.SECRET_KEY)  # Кодируем токен с использованием секретного ключа и алгоритма
+    payload.update({"exp": expire})  # Добавляем время истечения в данные токена
+    return jwt.encode(claims=payload, key=settings.SECRET_KEY, algorithm="HS256")
 
 
 def get_user_from_token(token: Annotated[str, Depends(oauth2_scheme)]):
@@ -32,7 +32,7 @@ def get_user_from_token(token: Annotated[str, Depends(oauth2_scheme)]):
     """
     try:
         payload = jwt.decode(token, settings.SECRET_KEY)
-        return payload.get('login')
+        return payload.get('username')
     except ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token has expired", headers={"WWW-Authenticate": "Bearer"})
     except JWTError:

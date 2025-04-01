@@ -1,5 +1,4 @@
-from pyexpat.errors import messages
-from typing import Annotated
+from typing import Annotated, AnyStr
 
 from fastapi import APIRouter, Form, status, Depends, HTTPException, Path
 from fastapi.responses import JSONResponse, Response
@@ -25,8 +24,10 @@ from app.services.user import (
     delete_user,
     update_user,
 )
-
+from app.core.security import get_user_from_token
 from app.dependency import auth_admin, auth_user
+
+
 
 router = APIRouter(
     tags=["Users"],
@@ -57,6 +58,33 @@ def set_user(user_in: Annotated[UserSchema, Form()]):
         return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"detail": "User already exists"})
     return JSONResponse(content=jsonable_encoder(user_in))
 
+@router.get(
+    "/me",
+    response_model=AnyStr,
+    status_code=status.HTTP_200_OK,
+    summary="Get user info",
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "User not found",
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Server Error",
+        },
+    }
+)
+def about_me(
+        current_user: Annotated[str, Depends(get_user_from_token)]
+):
+    """
+    Этот маршрут защищен и требует токен. Если токен действителен, мы возвращаем информацию о пользователе.
+    """
+    if current_user == settings.APP_ADMIN:
+        user = current_user
+    else:
+        user = select_current_user(current_user)
+    if user:
+        return JSONResponse(content=jsonable_encoder(user))
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "User not found"})
 
 @router.get(
     "/{username}",
@@ -74,7 +102,7 @@ def get_user(
         current_user: Annotated[dict[str], Depends(auth_user)]
 ):
     try:
-        if username == current_user['login'] or current_user['login'] == settings.APP_ADMIN:
+        if current_user.get('username') == username or current_user.get('username') == settings.APP_ADMIN:
             users = select_current_user(username)
         else:
             raise HTTPException(
@@ -136,9 +164,9 @@ def update_user_param(
         current_user: Annotated[dict[str], Depends(auth_user)]
 ):
     try:
-        if username == current_user['login'] or current_user['login'] == settings.APP_ADMIN:
+        if current_user.get('username') == username or current_user.get('username') == settings.APP_ADMIN:
             user = update_user(
-                login=username,
+                username=username,
                 first_name=first_name,
                 last_name=last_name,
                 email=email,
@@ -179,9 +207,9 @@ def update_name_user(
 ):
     try:
 
-        if username == current_user['login'] or current_user['login'] == settings.APP_ADMIN:
+        if current_user.get('username') == username or current_user.get('username') == settings.APP_ADMIN:
             user = update_user(
-                login=username,
+                username=username,
                 first_name=first_name,
                 last_name=last_name,
             )
@@ -221,9 +249,9 @@ def update_contact_user(
 ):
     try:
 
-        if username == current_user['login'] or current_user['login'] == settings.APP_ADMIN:
+        if current_user.get('username') == username or current_user.get('username') == settings.APP_ADMIN:
             user = update_user(
-                login=username,
+                username=username,
                 email=email,
                 phone=phone,
             )
@@ -259,7 +287,7 @@ def del_user(
         current_user: Annotated[dict[str], Depends(auth_user)]
 ):
     try:
-        if username == current_user['login'] or current_user['login'] == settings.APP_ADMIN:
+        if current_user.get('username') == username or current_user.get('username') == settings.APP_ADMIN:
             user = delete_user(username)
         else:
             raise HTTPException(
