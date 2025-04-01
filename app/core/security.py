@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Annotated
 from jose import jwt, JWTError, ExpiredSignatureError
 from fastapi import Depends, HTTPException
@@ -20,9 +20,9 @@ def create_jwt_token(data: dict):
     """
     Функция для создания JWT токена. Мы копируем входные данные, добавляем время истечения и кодируем токен.
     """
-    payload = data.copy()  # Копируем данные, чтобы не изменить исходный словарь
-    expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)  # Задаем время истечения токена
-    payload.update({"exp": expire})  # Добавляем время истечения в данные токена
+    payload = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    payload.update({"exp": expire})
     return jwt.encode(claims=payload, key=settings.SECRET_KEY, algorithm="HS256")
 
 
