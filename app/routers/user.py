@@ -25,7 +25,11 @@ from app.services.user import (
     update_user,
 )
 
-from app.dependency import auth_admin, auth_user,get_user_from_token
+from app.dependency import (
+    auth_admin,
+    auth_user,
+    get_user_from_token
+)
 
 
 
@@ -78,13 +82,23 @@ def about_me(
     """
     Этот маршрут защищен и требует токен. Если токен действителен, мы возвращаем информацию о пользователе.
     """
-    if current_user == settings.APP_ADMIN:
-        user = current_user
-    else:
-        user = select_current_user(current_user)
-    if user:
-        return JSONResponse(content=jsonable_encoder(user))
-    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "User not found"})
+    try:
+        if current_user == settings.APP_ADMIN:
+            user = current_user
+        else:
+            user = select_current_user(current_user)
+        if user:
+            return JSONResponse(content=jsonable_encoder(user))
+        else:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"detail": "User not found"}
+            )
+    except Exception:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": "Server Error"}
+        )
 
 @router.get(
     "/{username}",
@@ -102,7 +116,7 @@ def about_me(
 )
 def get_user(
         username: Annotated[str, Path()],
-        current_user: Annotated[str, Depends(get_user_from_token)]
+        current_user: Annotated[str, Depends(get_user_from_token)],
 ):
     try:
         if current_user == username:
@@ -113,8 +127,11 @@ def get_user(
                 content={"detail": "Invalid credentials"},
                 headers={"WWW-Authenticate": "Bearer"},
             )
-    except HTTPException:
-        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"detail": "Server Error"})
+    except Exception:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": "Server Error"}
+        )
     return JSONResponse(content=jsonable_encoder(users))
 
 
@@ -135,10 +152,12 @@ def get_users(
         # last_user: Annotated[dict[str], Cookie()]
 ):
     try:
-
         users = select_users()
     except Exception:
-        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"detail": "Server Error"})
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": "Server Error"}
+        )
     response = JSONResponse(content=jsonable_encoder(users))
     response.set_cookie(key='last_user', value=str(current_user))
     return response
@@ -160,14 +179,14 @@ def get_users(
 )
 def update_user_param(
         username: Annotated[str, Path()],
-        first_name: Annotated[str, Form()],
-        last_name: Annotated[str, Form()],
-        email: Annotated[EmailStr, Form()],
-        phone: Annotated[str, Form()],
-        current_user: Annotated[dict[str], Depends(auth_user)]
+        current_user: Annotated[str, Depends(get_user_from_token)],
+        first_name: str = Form(default=""),
+        last_name: str = Form(default=""),
+        email: str = Form(default="example@example.com"),
+        phone: str = Form(default="+79101234567"),
 ):
     try:
-        if current_user.get('username') == username or current_user.get('username') == settings.APP_ADMIN:
+        if current_user == username:
             user = update_user(
                 username=username,
                 first_name=first_name,
@@ -179,17 +198,23 @@ def update_user_param(
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials",
-                headers={"WWW-Authenticate": "Basic"},
+                headers={"WWW-Authenticate": "Bearer"},
             )
     except NoResultFound:
-        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "User not found"})
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"detail": "User not found"}
+        )
     except InterfaceError:
-        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"detail": "Server Error"})
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": "Server Error"}
+        )
     return JSONResponse(content=jsonable_encoder(user))
 
 
-@router.patch(
-    "/{username}",
+@router.put(
+    "/{username}/names",
     response_model=UserRead,
     status_code=status.HTTP_200_OK,
     summary="Update name user",
@@ -204,13 +229,13 @@ def update_user_param(
 )
 def update_name_user(
         username: Annotated[str, Path()],
-        first_name: Annotated[str, Form()],
-        last_name: Annotated[str, Form()],
-        current_user: Annotated[dict[str], Depends(auth_user)],
+        current_user: Annotated[str, Depends(get_user_from_token)],
+        first_name: str = Form(default=""),
+        last_name: str = Form(default=""),
 ):
     try:
 
-        if current_user.get('username') == username or current_user.get('username') == settings.APP_ADMIN:
+        if current_user == username:
             user = update_user(
                 username=username,
                 first_name=first_name,
@@ -220,7 +245,7 @@ def update_name_user(
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials",
-                headers={"WWW-Authenticate": "Basic"},
+                headers={"WWW-Authenticate": "Bearer"},
             )
     except NoResultFound:
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "User not found"})
@@ -229,7 +254,7 @@ def update_name_user(
     return JSONResponse(content=jsonable_encoder(user))
 
 
-@router.patch(
+@router.put(
     "/{username}/contacts",
     response_model=UserRead,
     status_code=status.HTTP_200_OK,
@@ -245,14 +270,13 @@ def update_name_user(
 )
 def update_contact_user(
         username: Annotated[str, Path()],
-        email: Annotated[str, Form()],
-        # email: Annotated[EmailStr, Field(description="Электронная почта пользователя")]
-        phone: Annotated[str, Form()],
-        current_user: Annotated[dict[str], Depends(auth_user)],
+        current_user: Annotated[str, Depends(get_user_from_token)],
+        email: str = Form(default="example@example.com"),
+        phone: str = Form(default="+79101234567"),
 ):
     try:
 
-        if current_user.get('username') == username or current_user.get('username') == settings.APP_ADMIN:
+        if current_user == username:
             user = update_user(
                 username=username,
                 email=email,
@@ -262,7 +286,7 @@ def update_contact_user(
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials",
-                headers={"WWW-Authenticate": "Basic"},
+                headers={"WWW-Authenticate": "Bearer"},
             )
     except NoResultFound:
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "User not found"})
@@ -287,16 +311,16 @@ def update_contact_user(
 )
 def del_user(
         username: Annotated[str, Path()],
-        current_user: Annotated[dict[str], Depends(auth_user)]
+        current_user: Annotated[str, Depends(get_user_from_token)],
 ):
     try:
-        if current_user.get('username') == username or current_user.get('username') == settings.APP_ADMIN:
+        if current_user == username:
             user = delete_user(username)
         else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials",
-                headers={"WWW-Authenticate": "Basic"},
+                headers={"WWW-Authenticate": "Bearer"},
             )
     except NoResultFound:
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "User not found"})

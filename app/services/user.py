@@ -11,7 +11,14 @@ from app.models import (
 )
 
 
-def create_user(username: str, password: str, first_name: str, last_name: str, email: str, phone: str):
+def create_user(
+        username: str,
+        password: str,
+        first_name: str,
+        last_name: str,
+        email: str,
+        phone: str
+) -> UserRead:
     user = User(
         username=username,
         password_hash=pwd_context.hash(password),
@@ -21,53 +28,32 @@ def create_user(username: str, password: str, first_name: str, last_name: str, e
         phone=phone
     )
     with Session(engine) as session:
-        try:
-            session.add(user)
-        except Exception:
-            raise
-        finally:
-            session.commit()
-    return user
+        session.add(user)
+    return user.get_schemas_user
 
 
-def select_users():
+def select_users() -> list:
+    users_list = []
     with Session(engine) as session:
-        try:
-            users = session.query(User).all()
-            users_list = []
-            for user in users:
-                users_list.append(user.get_schemas_user)
-        except Exception:
-            raise
-        finally:
-            session.commit()
+        users = session.query(User).all()
+        for user in users:
+            users_list.append(user.get_schemas_user)
     return users_list
 
 
-def select_current_user(username: str):
+def select_current_user(username: str) -> UserRead:
     with Session(engine) as session:
-        try:
-            user = session.query(User).filter(User.username == username).one()
-            user_out = user.get_schemas_user
-        except Exception:
-            raise
-        finally:
-            session.commit()
+        user = session.query(User).filter(User.username == username).one()
+        user_out = user.get_schemas_user
     return user_out
 
 
-def select_user_password():
+def select_user_password() -> list:
+    users_list = []
     with Session(engine) as session:
-        try:
-            users = session.query(User).all()
-            users_list = []
-            for user in users:
-                users_list.append(user.get_username_password)
-        except Exception:
-            raise
-        finally:
-            session.commit()
-    print(users_list)
+        users = session.query(User).all()
+        for user in users:
+            users_list.append(user.get_username_password)
     return users_list
 
 
@@ -79,30 +65,20 @@ def update_user(
         phone: str | None = None,
 ) -> UserRead:
     with Session(engine) as session:
-        try:
-            user = session.query(User).filter(User.username == username).one()
-            if first_name: user.first_name = first_name
-            if last_name: user.last_name = last_name
-            if email: user.email = email
-            if phone: user.phone = phone
-            user_out = user.get_schemas_user
-        except Exception:
-            raise
-        finally:
-            session.commit()
+        user = session.query(User).filter(User.username == username).one()
+        if first_name: user.first_name = first_name
+        if last_name: user.last_name = last_name
+        if email: user.email = email
+        if phone: user.phone = phone
+        user_out = user.get_schemas_user
     return user_out
 
 
 def delete_user(username: str) -> UserRead:
     with Session(engine) as session:
-        try:
-            user = session.query(User).filter(User.username == username).one()
-            user_out = user.get_schemas_user
-            session.delete(user)
-        except Exception:
-            raise
-        finally:
-            session.commit()
+        user = session.query(User).filter(User.username == username).one()
+        user_out = user.get_schemas_user
+        session.delete(user)
     return user_out
 
 
