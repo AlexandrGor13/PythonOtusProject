@@ -33,7 +33,7 @@ from app.dependency import (
 
 router = APIRouter(
     tags=["Users"],
-    prefix="/users"
+    prefix="/api/users"
 )
 
 
