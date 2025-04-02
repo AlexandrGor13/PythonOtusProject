@@ -1,17 +1,29 @@
 import secrets
 from typing import Annotated
-from fastapi import Form, Depends, status, HTTPException
-from fastapi.security import HTTPBasic, HTTPBasicCredentials, OAuth2PasswordRequestForm
+from jose import jwt, JWTError, ExpiredSignatureError
+from fastapi import (
+    Form,
+    Depends,
+    status,
+    HTTPException
+)
+from fastapi.security import (
+    HTTPBasic,
+    HTTPBearer,
+    HTTPBasicCredentials,
+    HTTPAuthorizationCredentials,
+)
 
 from app.core.config import settings
 from app.services.user import select_user_password
 from app.core.security import pwd_context
 from app.schemas import UserAuth, User
 
-security = HTTPBasic()
+security_basic = HTTPBasic()
+security_bearer = HTTPBearer()
 
 
-def auth_admin(credentials: HTTPBasicCredentials = Depends(security)):
+def auth_admin(credentials: HTTPBasicCredentials = Depends(security_basic)):
     is_user_ok = secrets.compare_digest(credentials.username, settings.APP_ADMIN)
     is_pass_ok = pwd_context.verify(credentials.password, settings.APP_PASSWORD)
     if not (is_user_ok and is_pass_ok):
@@ -20,16 +32,15 @@ def auth_admin(credentials: HTTPBasicCredentials = Depends(security)):
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Basic"},
         )
-    return {'login': settings.APP_ADMIN, 'password': settings.APP_PASSWORD}
+    return {'username': settings.APP_ADMIN, 'password': settings.APP_PASSWORD}
 
 
-def auth_user(credentials: HTTPBasicCredentials = Depends(security)):
-    items = select_user_password()
-    items.append({'login': settings.APP_ADMIN, 'password': settings.APP_PASSWORD})
+def auth_user(credentials: HTTPBasicCredentials = Depends(security_basic)):
+    items = list(map(lambda us: UserAuth(**us), select_user_password()))
     for item in items:
-        is_login_ok = secrets.compare_digest(credentials.username, item.get('login'))
-        is_pass_ok = pwd_context.verify(credentials.password, item.get('password'))
-        if is_login_ok and is_pass_ok:
+        is_user_ok = secrets.compare_digest(credentials.username, item.username)
+        is_pass_ok = pwd_context.verify(credentials.password, item.password_hash)
+        if is_user_ok and is_pass_ok:
             return item
     else:
         raise HTTPException(
@@ -38,18 +49,31 @@ def auth_user(credentials: HTTPBasicCredentials = Depends(security)):
             headers={"WWW-Authenticate": "Basic"},
         )
 
-def auth_user_jwt(user_in: Annotated[OAuth2PasswordRequestForm, Depends()],):
-    items = list(map(lambda us: UserAuth(**us), select_user_password()))
-    items.append(UserAuth(username=settings.APP_ADMIN, password_hash=settings.APP_PASSWORD))
-    for item in items:
-        is_login_ok = secrets.compare_digest(user_in.username, item.username)
-        is_pass_ok = pwd_context.verify(user_in.password, item.password_hash)
-        if is_login_ok and is_pass_ok:
-            return item
-    else:
+
+def get_user_from_token(credentials: HTTPAuthorizationCredentials = Depends(security_bearer)):
+    """
+    Функция для извлечения информации о пользователе из токена. Проверяем токен и извлекаем утверждение о пользователе.
+    """
+    token = credentials.credentials
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY)
+        username = payload.get('sub')
+        if username is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Unable to validate credentials",
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+        return username
+    except ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "JWT"},
+            detail="Token has expired",
+            headers={"WWW-Authenticate": "Bearer"}
         )
-
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token",
+            headers={"WWW-Authenticate": "Bearer"}
+        )

@@ -24,8 +24,8 @@ from app.services.user import (
     delete_user,
     update_user,
 )
-from app.core.security import get_user_from_token
-from app.dependency import auth_admin, auth_user
+
+from app.dependency import auth_admin, auth_user,get_user_from_token
 
 
 
@@ -92,6 +92,9 @@ def about_me(
     status_code=status.HTTP_200_OK,
     summary="Get user",
     responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Invalid credentials",
+        },
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Server Error",
         }
@@ -99,18 +102,18 @@ def about_me(
 )
 def get_user(
         username: Annotated[str, Path()],
-        current_user: Annotated[dict[str], Depends(auth_user)]
+        current_user: Annotated[str, Depends(get_user_from_token)]
 ):
     try:
-        if current_user.get('username') == username or current_user.get('username') == settings.APP_ADMIN:
+        if current_user == username:
             users = select_current_user(username)
         else:
-            raise HTTPException(
+            return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid credentials",
-                headers={"WWW-Authenticate": "Basic"},
+                content={"detail": "Invalid credentials"},
+                headers={"WWW-Authenticate": "Bearer"},
             )
-    except Exception:
+    except HTTPException:
         return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"detail": "Server Error"})
     return JSONResponse(content=jsonable_encoder(users))
 
