@@ -29,6 +29,7 @@ def create_user(
     )
     with Session(engine) as session:
         session.add(user)
+        session.commit()
     return user.get_schemas_user
 
 
@@ -71,6 +72,7 @@ def update_user(
         if email: user.email = email
         if phone: user.phone = phone
         user_out = user.get_schemas_user
+        session.commit()
     return user_out
 
 
@@ -79,6 +81,7 @@ def delete_user(username: str) -> UserRead:
         user = session.query(User).filter(User.username == username).one()
         user_out = user.get_schemas_user
         session.delete(user)
+        session.commit()
     return user_out
 
 

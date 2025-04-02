@@ -1,5 +1,4 @@
 import secrets
-from typing import Annotated
 from jose import jwt, JWTError, ExpiredSignatureError
 from fastapi import (
     Form,
@@ -13,7 +12,6 @@ from fastapi.security import (
     HTTPBasicCredentials,
     HTTPAuthorizationCredentials,
 )
-
 from app.core.config import settings
 from app.services.user import select_user_password
 from app.core.security import pwd_context
