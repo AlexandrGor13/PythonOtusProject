@@ -6,18 +6,25 @@ from app.core.security import create_jwt_token
 
 from app.dependency import auth_user
 
-router = APIRouter(tags=["Authentication"])
+router = APIRouter(tags=["Authentification"])
 
 
 @router.post(
     "/login",
-    # response_model=UserRead,
     status_code=status.HTTP_200_OK,
-    summary="User authentication",
+    summary="User authentification",
     responses={
+        status.HTTP_200_OK: {
+            "description": "User deleted",
+            "content": {
+                "application/json": {
+                    "example": {"access_token": "token", "token_type": "JWT"}
+                }
+            },
+        },
         status.HTTP_401_UNAUTHORIZED: {
             "description": "Invalid credentials",
-        }
+        },
     },
 )
 def login(

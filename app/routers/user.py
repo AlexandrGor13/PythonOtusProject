@@ -25,7 +25,6 @@ router = APIRouter(tags=["Users"], prefix="/api/users")
 
 @router.post(
     "",
-    response_model=UserSchema,
     status_code=status.HTTP_200_OK,
     summary="Create user",
     responses={
@@ -76,7 +75,6 @@ def set_user(user_in: Annotated[UserSchema, Form()]):
 
 @router.get(
     "/me",
-    # response_model=UserRead,
     status_code=status.HTTP_200_OK,
     summary="Get user info",
     responses={
@@ -131,7 +129,6 @@ def about_me(current_user: Annotated[str, Depends(get_user_from_token)]):
 
 @router.put(
     "/me",
-    response_model=UserRead,
     status_code=status.HTTP_200_OK,
     summary="Update user",
     responses={
@@ -198,7 +195,6 @@ def update_user_info(
 
 @router.delete(
     "/me",
-    response_model=UserRead,
     status_code=status.HTTP_200_OK,
     summary="Delete user",
     responses={
