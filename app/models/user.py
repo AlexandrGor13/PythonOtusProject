@@ -31,12 +31,10 @@ class User(Base):
     first_name: Mapped[str] = mapped_column(
         String(50),
         default="",
-        server_default="",
     )
     last_name: Mapped[str] = mapped_column(
         String(50),
         default="",
-        server_default="",
     )
     email: Mapped[str] = mapped_column(
         String(30),

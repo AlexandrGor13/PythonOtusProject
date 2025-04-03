@@ -1,11 +1,6 @@
 import secrets
 from jose import jwt, JWTError, ExpiredSignatureError
-from fastapi import (
-    Form,
-    Depends,
-    status,
-    HTTPException
-)
+from fastapi import Depends, status, HTTPException
 from fastapi.security import (
     HTTPBasic,
     HTTPBearer,
@@ -15,7 +10,7 @@ from fastapi.security import (
 from app.core.config import settings
 from app.services.user import select_user_password
 from app.core.security import pwd_context
-from app.schemas import UserAuth, User
+from app.schemas import UserAuth
 
 security_basic = HTTPBasic()
 security_bearer = HTTPBearer()
@@ -30,7 +25,7 @@ def auth_admin(credentials: HTTPBasicCredentials = Depends(security_basic)):
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Basic"},
         )
-    return {'username': settings.APP_ADMIN, 'password': settings.APP_PASSWORD}
+    return {"username": settings.APP_ADMIN, "password": settings.APP_PASSWORD}
 
 
 def auth_user(credentials: HTTPBasicCredentials = Depends(security_basic)):
@@ -48,30 +43,32 @@ def auth_user(credentials: HTTPBasicCredentials = Depends(security_basic)):
         )
 
 
-def get_user_from_token(credentials: HTTPAuthorizationCredentials = Depends(security_bearer)):
+def get_user_from_token(
+    credentials: HTTPAuthorizationCredentials = Depends(security_bearer),
+):
     """
     Функция для извлечения информации о пользователе из токена. Проверяем токен и извлекаем утверждение о пользователе.
     """
     token = credentials.credentials
     try:
         payload = jwt.decode(token, settings.SECRET_KEY)
-        username = payload.get('sub')
+        username = payload.get("sub")
         if username is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Unable to validate credentials",
-                headers={"WWW-Authenticate": "Bearer"}
+                headers={"WWW-Authenticate": "Bearer"},
             )
         return username
     except ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired",
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )

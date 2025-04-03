@@ -1,7 +1,6 @@
 from sqladmin import Admin, ModelView
 from sqladmin.authentication import AuthenticationBackend
 from fastapi.requests import Request
-from fastapi.responses import RedirectResponse
 import secrets
 from app.routers import router
 from app.core.config import settings
@@ -20,23 +19,33 @@ def create_admin(app):
 
 
 class UserAdmin(ModelView, model=User):
-    column_list = [column['name'] for column in inspector.get_columns(User.__tablename__)]
+    column_list = [
+        column["name"] for column in inspector.get_columns(User.__tablename__)
+    ]
 
 
 class OrderAdmin(ModelView, model=Order):
-    column_list = [column['name'] for column in inspector.get_columns(Order.__tablename__)]
+    column_list = [
+        column["name"] for column in inspector.get_columns(Order.__tablename__)
+    ]
 
 
 class AddressAdmin(ModelView, model=Address):
-    column_list = [column['name'] for column in inspector.get_columns(Address.__tablename__)]
+    column_list = [
+        column["name"] for column in inspector.get_columns(Address.__tablename__)
+    ]
 
 
 class ProductAdmin(ModelView, model=Product):
-    column_list = [column['name'] for column in inspector.get_columns(Product.__tablename__)]
+    column_list = [
+        column["name"] for column in inspector.get_columns(Product.__tablename__)
+    ]
 
 
 class OrderItemAdmin(ModelView, model=OrderItem):
-    column_list = [column['name'] for column in inspector.get_columns(OrderItem.__tablename__)]
+    column_list = [
+        column["name"] for column in inspector.get_columns(OrderItem.__tablename__)
+    ]
 
 
 class AdminAuth(AuthenticationBackend):

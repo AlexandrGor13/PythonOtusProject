@@ -15,6 +15,7 @@ from .base import Base
 if TYPE_CHECKING:
     from .user import User
 
+
 class Address(Base):
     __tablename__ = "address"
 

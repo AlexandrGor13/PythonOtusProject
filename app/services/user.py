@@ -12,12 +12,12 @@ from app.models import (
 
 
 def create_user(
-        username: str,
-        password: str,
-        first_name: str,
-        last_name: str,
-        email: str,
-        phone: str
+    username: str,
+    password: str,
+    first_name: str,
+    last_name: str,
+    email: str,
+    phone: str,
 ) -> UserRead:
     user = User(
         username=username,
@@ -25,12 +25,13 @@ def create_user(
         first_name=first_name,
         last_name=last_name,
         email=email,
-        phone=phone
+        phone=phone,
     )
     with Session(engine) as session:
+        user_out = user.get_schemas_user
         session.add(user)
         session.commit()
-    return user.get_schemas_user
+    return user_out
 
 
 def select_users() -> list:
@@ -59,18 +60,22 @@ def select_user_password() -> list:
 
 
 def update_user(
-        username: str,
-        first_name: str | None = None,
-        last_name: str | None = None,
-        email: str | None = None,
-        phone: str | None = None,
+    username: str,
+    first_name: str | None = None,
+    last_name: str | None = None,
+    email: str | None = None,
+    phone: str | None = None,
 ) -> UserRead:
     with Session(engine) as session:
         user = session.query(User).filter(User.username == username).one()
-        if first_name: user.first_name = first_name
-        if last_name: user.last_name = last_name
-        if email: user.email = email
-        if phone: user.phone = phone
+        if first_name:
+            user.first_name = first_name
+        if last_name:
+            user.last_name = last_name
+        if email:
+            user.email = email
+        if phone:
+            user.phone = phone
         user_out = user.get_schemas_user
         session.commit()
     return user_out
@@ -83,5 +88,3 @@ def delete_user(username: str) -> UserRead:
         session.delete(user)
         session.commit()
     return user_out
-
-

@@ -10,11 +10,11 @@ app = FastAPI()
 app.include_router(router)
 create_admin(app)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from dotenv import load_dotenv
     import pathlib
 
-    path_env = pathlib.Path(__file__).parents[-1] / '.env'
+    path_env = pathlib.Path(__file__).parents[-1] / ".env"
     load_dotenv(path_env)
 
     uvicorn.run("main:app", reload=True)

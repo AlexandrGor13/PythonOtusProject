@@ -8,4 +8,3 @@ router = APIRouter()
 router.include_router(root_router)
 router.include_router(login_router)
 router.include_router(user_router)
-

@@ -7,8 +7,6 @@ __all__ = (
     "Product",
     "Order",
     "OrderItem",
-
-
 )
 
 from .base import Base, engine, inspector

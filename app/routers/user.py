@@ -1,40 +1,26 @@
-from typing import Annotated, AnyStr
-
-from fastapi import APIRouter, Form, status, Depends, HTTPException, Path
-from fastapi.responses import JSONResponse, Response
+from typing import Annotated
+from fastapi import APIRouter, Form, status, Depends
+from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from pydantic import EmailStr
 
-from sqlalchemy.exc import (
-    NoResultFound,
-    InterfaceError,
-    IntegrityError
-)
+from sqlalchemy.exc import NoResultFound, InterfaceError, IntegrityError
 
-from app.core.config import settings
-from app.schemas import (
-    User as UserSchema,
-    UserRead
-)
+from app.schemas import User as UserSchema, UserRead
 
 from app.services.user import (
-    select_users,
     select_current_user,
     create_user,
     delete_user,
     update_user,
 )
 
-from app.dependency import (
-    auth_admin,
-    auth_user,
-    get_user_from_token
-)
+from app.dependency import get_user_from_token
 
-router = APIRouter(
-    tags=["Users"],
-    prefix="/api/users"
-)
+DEFAULT_STR = ""
+DEFAULT_EMAIL = "***@***.***"
+DEFAULT_PHONE = "+7**********"
+
+router = APIRouter(tags=["Users"], prefix="/api/users")
 
 
 @router.post(
@@ -43,9 +29,25 @@ router = APIRouter(
     status_code=status.HTTP_200_OK,
     summary="Create user",
     responses={
-        status.HTTP_409_CONFLICT: {
-            "description": "User already exists"
+        status.HTTP_200_OK: {
+            "description": "User created",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "User created",
+                        "user info": {
+                            "username": "string",
+                            "first_name": "",
+                            "last_name": "",
+                            "email": "user@example.com",
+                            "phone": "string",
+                            "password": "stringst",
+                        },
+                    }
+                }
+            },
         },
+        status.HTTP_409_CONFLICT: {"description": "User already exists"},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Server Error",
         },
@@ -55,29 +57,56 @@ def set_user(user_in: Annotated[UserSchema, Form()]):
     try:
         user = create_user(**user_in.__dict__)
     except InterfaceError:
-        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"detail": "Server Error"})
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": "Server Error"},
+        )
     except IntegrityError:
-        return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"detail": "User already exists"})
-    return JSONResponse(content=jsonable_encoder(user))
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content={"detail": "User already exists"},
+        )
+    return JSONResponse(
+        content={
+            "description": "User created",
+            "user info": jsonable_encoder(user),
+        }
+    )
 
 
 @router.get(
     "/me",
-    response_model=AnyStr,
+    # response_model=UserRead,
     status_code=status.HTTP_200_OK,
     summary="Get user info",
     responses={
+        status.HTTP_200_OK: {
+            "description": "User info",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "User info",
+                        "user info": {
+                            "username": "string",
+                            "first_name": "",
+                            "last_name": "",
+                            "email": "user@example.com",
+                            "phone": "string",
+                            "password": "stringst",
+                        },
+                    }
+                }
+            },
+        },
         status.HTTP_404_NOT_FOUND: {
             "description": "User not found",
         },
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Server Error",
         },
-    }
+    },
 )
-def about_me(
-        current_user: Annotated[str, Depends(get_user_from_token)]
-):
+def about_me(current_user: Annotated[str, Depends(get_user_from_token)]):
     """
     Этот маршрут защищен и требует токен. Если токен действителен, мы возвращаем информацию о пользователе.
     """
@@ -85,48 +114,19 @@ def about_me(
         user = select_current_user(current_user)
     except NoResultFound:
         return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"detail": "User not found"}
+            status_code=status.HTTP_404_NOT_FOUND, content={"detail": "User not found"}
         )
     except InterfaceError:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": "Server Error"}
+            content={"detail": "Server Error"},
         )
-    return JSONResponse(content=jsonable_encoder(user))
-
-
-@router.get(
-    "",
-    response_model=UserRead,
-    status_code=status.HTTP_200_OK,
-    summary="Get users",
-    responses={
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            "description": "Server Error",
+    return JSONResponse(
+        content={
+            "description": "User info",
+            "user info": jsonable_encoder(user),
         }
-    },
-    # dependencies=[Depends(auth_admin)],
-)
-def get_users(
-        current_user: Annotated[dict[str], Depends(auth_admin)],
-        # last_user: Annotated[dict[str], Cookie()]
-):
-    try:
-        users = select_users()
-    except NoResultFound:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"detail": "User not found"}
-        )
-    except InterfaceError:
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": "Server Error"}
-        )
-    response = JSONResponse(content=jsonable_encoder(users))
-    response.set_cookie(key='last_user', value=str(current_user))
-    return response
+    )
 
 
 @router.put(
@@ -135,116 +135,65 @@ def get_users(
     status_code=status.HTTP_200_OK,
     summary="Update user",
     responses={
+        status.HTTP_200_OK: {
+            "description": "User updated",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "User updated",
+                        "user info": {
+                            "username": "string",
+                            "first_name": "",
+                            "last_name": "",
+                            "email": "user@example.com",
+                            "phone": "string",
+                            "password": "stringst",
+                        },
+                    }
+                }
+            },
+        },
         status.HTTP_404_NOT_FOUND: {
             "description": "User not found",
         },
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Server Error",
-        }
-    },
-)
-def update_user_param(
-        current_user: Annotated[str, Depends(get_user_from_token)],
-        first_name: str = Form(default=""),
-        last_name: str = Form(default=""),
-        email: str = Form(default="example@example.com"),
-        phone: str = Form(default="+79101234567"),
-):
-    try:
-        user = update_user(
-            username=current_user,
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-            phone=phone,
-        )
-    except NoResultFound:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"detail": "User not found"}
-        )
-    except InterfaceError:
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": "Server Error"}
-        )
-    return JSONResponse(content=jsonable_encoder(user))
-
-
-@router.put(
-    "/me/names",
-    response_model=UserRead,
-    status_code=status.HTTP_200_OK,
-    summary="Update name user",
-    responses={
-        status.HTTP_404_NOT_FOUND: {
-            "description": "User not found",
         },
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            "description": "Server Error",
-        }
     },
 )
-def update_name_user(
-        current_user: Annotated[str, Depends(get_user_from_token)],
-        first_name: str = Form(default=""),
-        last_name: str = Form(default=""),
+def update_user_info(
+    current_user: Annotated[str, Depends(get_user_from_token)],
+    first_name: str = Form(default=DEFAULT_STR),
+    last_name: str = Form(default=DEFAULT_STR),
+    email: str = Form(default=DEFAULT_EMAIL),
+    phone: str = Form(default=DEFAULT_PHONE),
 ):
     try:
-        user = update_user(
-            username=current_user,
-            first_name=first_name,
-            last_name=last_name,
-        )
+        data = {"username": current_user}
+        if first_name != DEFAULT_STR:
+            data["first_name"] = first_name
+        if last_name != DEFAULT_STR:
+            data["last_name"] = last_name
+        if email != DEFAULT_EMAIL:
+            data["email"] = email
+        if phone != DEFAULT_PHONE:
+            data["phone"] = phone
+        user = update_user(**data)
     except NoResultFound:
         return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"detail": "User not found"}
+            status_code=status.HTTP_404_NOT_FOUND, content={"detail": "User not found"}
         )
     except InterfaceError:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": "Server Error"}
+            content={"detail": "Server Error"},
         )
-    return JSONResponse(content=jsonable_encoder(user))
-
-
-@router.put(
-    "/me/contacts",
-    response_model=UserRead,
-    status_code=status.HTTP_200_OK,
-    summary="Update contact user",
-    responses={
-        status.HTTP_404_NOT_FOUND: {
-            "description": "User not found",
-        },
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            "description": "Server Error",
+    return JSONResponse(
+        content={
+            "description": "User updated",
+            "user info": jsonable_encoder(user),
         }
-    },
-)
-def update_contact_user(
-        current_user: Annotated[str, Depends(get_user_from_token)],
-        email: str = Form(default="example@example.com"),
-        phone: str = Form(default="+79101234567"),
-):
-    try:
-        user = update_user(
-            username=current_user,
-            email=email,
-            phone=phone,
-        )
-    except NoResultFound:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"detail": "User not found"}
-        )
-    except InterfaceError:
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": "Server Error"}
-        )
-    return JSONResponse(content=jsonable_encoder(user))
+    )
 
 
 @router.delete(
@@ -253,12 +202,30 @@ def update_contact_user(
     status_code=status.HTTP_200_OK,
     summary="Delete user",
     responses={
+        status.HTTP_200_OK: {
+            "description": "User deleted",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "User deleted",
+                        "user info": {
+                            "username": "string",
+                            "first_name": "",
+                            "last_name": "",
+                            "email": "user@example.com",
+                            "phone": "string",
+                            "password": "stringst",
+                        },
+                    }
+                }
+            },
+        },
         status.HTTP_404_NOT_FOUND: {
             "description": "User not found",
         },
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Server Error",
-        }
+        },
     },
 )
 def del_user(current_user: Annotated[str, Depends(get_user_from_token)]):
@@ -266,12 +233,16 @@ def del_user(current_user: Annotated[str, Depends(get_user_from_token)]):
         user = delete_user(current_user)
     except NoResultFound:
         return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"detail": "User not found"}
+            status_code=status.HTTP_404_NOT_FOUND, content={"detail": "User not found"}
         )
     except InterfaceError:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"detail": "Server Error"}
+            content={"detail": "Server Error"},
         )
-    return JSONResponse(content=jsonable_encoder(user))
+    return JSONResponse(
+        content={
+            "detail": "User deleted",
+            "user info": jsonable_encoder(user),
+        }
+    )

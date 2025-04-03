@@ -14,7 +14,6 @@ from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
     mapped_column,
-
 )
 
 engine = create_engine(
@@ -31,14 +30,9 @@ class Base(DeclarativeBase):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP,
-        server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP,
-        server_default=func.now(),
-        onupdate=func.now()
+        TIMESTAMP, server_default=func.now(), onupdate=func.now()
     )
 
     def to_dict(self, exclude_none: bool = False):
@@ -66,4 +60,3 @@ class Base(DeclarativeBase):
                 result[column.key] = value
 
         return result
-
