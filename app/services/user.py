@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.core.security import pwd_context
+from app.core.security import get_password_hash
 from app.schemas.user import UserRead
 from app.models import (
     engine,
@@ -21,7 +21,7 @@ def create_user(
 ) -> UserRead:
     user = User(
         username=username,
-        password_hash=pwd_context.hash(password),
+        password_hash=get_password_hash(password),
         first_name=first_name,
         last_name=last_name,
         email=email,

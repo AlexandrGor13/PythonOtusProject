@@ -2,7 +2,7 @@ from fastapi import FastAPI
 
 import uvicorn
 
-from app.routers import router
+from app.api import router
 from app.internal.admin import create_admin
 
 app = FastAPI()

@@ -14,13 +14,13 @@ from app.services.user import (
     update_user,
 )
 
-from app.dependency import get_current_user
+from app.api.auth.dependency import get_current_user
 
 DEFAULT_STR = ""
 DEFAULT_EMAIL = "***@***.***"
 DEFAULT_PHONE = "+7**********"
 
-router = APIRouter(tags=["Users"], prefix="/api/users")
+router = APIRouter(tags=["Users"], prefix="/users")
 
 
 @router.post(

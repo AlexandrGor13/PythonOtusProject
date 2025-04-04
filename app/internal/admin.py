@@ -2,7 +2,7 @@ from sqladmin import Admin, ModelView
 from sqladmin.authentication import AuthenticationBackend
 from fastapi.requests import Request
 import uuid
-from app.routers import router
+from app.api import router
 from app.core.config import settings
 from app.core.security import verify_password, verify_string
 from app.models import *
