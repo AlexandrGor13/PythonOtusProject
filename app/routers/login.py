@@ -7,10 +7,7 @@ from app.schemas.user import UserAuth
 from app.schemas.token import Token
 from app.core.security import create_jwt_token
 
-from app.dependency import (
-    # auth_user,
-    auth_user_oath2
-)
+from app.dependency import auth_user_oath2
 
 router = APIRouter(tags=["Authentification"])
 

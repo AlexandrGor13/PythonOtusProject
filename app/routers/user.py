@@ -5,7 +5,7 @@ from fastapi.encoders import jsonable_encoder
 
 from sqlalchemy.exc import NoResultFound, InterfaceError, IntegrityError
 
-from app.schemas import User as UserSchema, UserRead
+from app.schemas import User as UserSchema
 
 from app.services.user import (
     select_current_user,
@@ -53,6 +53,9 @@ router = APIRouter(tags=["Users"], prefix="/api/users")
     },
 )
 def set_user(user_in: Annotated[UserSchema, Body()]):
+    """
+    Создание нового пользователя
+    """
     try:
         user = create_user(**user_in.__dict__)
     except InterfaceError:
@@ -165,6 +168,9 @@ def update_user_info(
     email: str = Body(default=DEFAULT_EMAIL),
     phone: str = Body(default=DEFAULT_PHONE),
 ):
+    """
+    Этот маршрут защищен и требует токен. Если токен действителен, мы можем изменить информацию о пользователе.
+    """
     try:
         data = {"username": current_user}
         if first_name != DEFAULT_STR:
@@ -226,6 +232,9 @@ def update_user_info(
     },
 )
 def del_user(current_user: Annotated[str, Depends(get_current_user)]):
+    """
+    Этот маршрут защищен и требует токен. Если токен действителен, мы можем удалить пользователя.
+    """
     try:
         user = delete_user(current_user)
     except NoResultFound:
