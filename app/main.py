@@ -10,6 +10,7 @@ app = FastAPI()
 app.include_router(router)
 create_admin(app)
 
+
 if __name__ == "__main__":
     from dotenv import load_dotenv
     import pathlib

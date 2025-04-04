@@ -1,3 +1,4 @@
+from fastapi import FastAPI
 from sqladmin import Admin, ModelView
 from sqladmin.authentication import AuthenticationBackend
 from fastapi.requests import Request
@@ -8,7 +9,7 @@ from app.core.security import verify_password, verify_string
 from app.models import *
 
 
-def create_admin(app):
+def create_admin(app: FastAPI):
     app.include_router(router)
     admin = Admin(app, engine, authentication_backend=authentication_backend)
     admin.add_view(UserAdmin)

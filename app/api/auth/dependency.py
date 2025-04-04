@@ -1,6 +1,6 @@
 from typing import Annotated
 from jose import jwt, JWTError, ExpiredSignatureError
-from fastapi import Depends, status, HTTPException
+from fastapi import Depends, status, HTTPException, APIRouter
 from fastapi.security import (
     HTTPBasic,
     HTTPBasicCredentials,
@@ -12,8 +12,9 @@ from app.services.user import select_user_password
 from app.core.security import verify_password, verify_string
 from app.schemas import UserAuth
 
+
 security_basic = HTTPBasic()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
 
 
 def auth_admin(credentials: HTTPBasicCredentials = Depends(security_basic)):
