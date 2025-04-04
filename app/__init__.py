@@ -1,5 +1,5 @@
 from .dependency import (
-    auth_admin,
-    auth_user,
-    get_user_from_token
+    # auth_admin,
+    # auth_user,
+    get_current_user,
 )

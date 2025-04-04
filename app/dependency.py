@@ -1,24 +1,28 @@
-import secrets
+from typing import Annotated
 from jose import jwt, JWTError, ExpiredSignatureError
 from fastapi import Depends, status, HTTPException
 from fastapi.security import (
     HTTPBasic,
-    HTTPBearer,
     HTTPBasicCredentials,
-    HTTPAuthorizationCredentials,
+    OAuth2PasswordBearer,
+    OAuth2PasswordRequestForm,
 )
 from app.core.config import settings
 from app.services.user import select_user_password
-from app.core.security import pwd_context
+from app.core.security import verify_password, verify_string
 from app.schemas import UserAuth
 
 security_basic = HTTPBasic()
-security_bearer = HTTPBearer()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
 def auth_admin(credentials: HTTPBasicCredentials = Depends(security_basic)):
-    is_user_ok = secrets.compare_digest(credentials.username, settings.APP_ADMIN)
-    is_pass_ok = pwd_context.verify(credentials.password, settings.APP_PASSWORD)
+    """
+    Функция для извлечения информации об администраторе из HTTPBasic авторизации.
+    Проверяем логин и пароль администратора.
+    """
+    is_user_ok = verify_string(credentials.username, settings.APP_ADMIN)
+    is_pass_ok = verify_password(credentials.password, settings.APP_PASSWORD)
     if not (is_user_ok and is_pass_ok):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -29,10 +33,14 @@ def auth_admin(credentials: HTTPBasicCredentials = Depends(security_basic)):
 
 
 def auth_user(credentials: HTTPBasicCredentials = Depends(security_basic)):
+    """
+    Функция для извлечения информации о пользователе из HTTPBasic авторизации.
+    Проверяем логин и пароль пользователя.
+    """
     items = list(map(lambda us: UserAuth(**us), select_user_password()))
     for item in items:
-        is_user_ok = secrets.compare_digest(credentials.username, item.username)
-        is_pass_ok = pwd_context.verify(credentials.password, item.password_hash)
+        is_user_ok = verify_string(credentials.username, item.username)
+        is_pass_ok = verify_password(credentials.password, item.password_hash)
         if is_user_ok and is_pass_ok:
             return item
     else:
@@ -43,16 +51,30 @@ def auth_user(credentials: HTTPBasicCredentials = Depends(security_basic)):
         )
 
 
-def get_user_from_token(
-    credentials: HTTPAuthorizationCredentials = Depends(security_bearer),
-):
+def auth_user_oath2(credentials: Annotated[OAuth2PasswordRequestForm, Depends()]):
     """
-    Функция для извлечения информации о пользователе из токена. Проверяем токен и извлекаем утверждение о пользователе.
+    Функция для извлечения информации о пользователе из OAuth2PasswordBearer авторизации.
+    Проверяем логин и пароль пользователя.
     """
-    token = credentials.credentials
+    items = list(map(lambda us: UserAuth(**us), select_user_password()))
+    for item in items:
+        is_user_ok = verify_string(credentials.username, item.username)
+        is_pass_ok = verify_password(credentials.password, item.password_hash)
+        if is_user_ok and is_pass_ok:
+            return item
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+def get_current_user(credentials: Annotated[str, Depends(oauth2_scheme)]):
+    """Получение текущего пользователя из токена"""
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY)
-        username = payload.get("sub")
+        payload = jwt.decode(credentials, settings.SECRET_KEY)
+        username: str = payload.get("sub")
         if username is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

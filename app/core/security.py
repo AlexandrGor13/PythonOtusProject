@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from jose import jwt
 import bcrypt
+import secrets
 from passlib.context import CryptContext
 
 from app.core.config import settings
@@ -9,6 +10,20 @@ if not hasattr(bcrypt, "__about__"):
     bcrypt.__about__ = type("about", (object,), {"__version__": bcrypt.__version__})
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def verify_string(one_string: str, other_string: str) -> bool:
+    """Функция для проверки, соответствует ли одна строка другой"""
+    return secrets.compare_digest(one_string, other_string)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Функция для проверки, соответствует ли полученный пароль сохраненному хэшу"""
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+def get_password_hash(password: str):
+    """Функция генерации хэша пароля"""
+    return pwd_context.hash(password)
+
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
 

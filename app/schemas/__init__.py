@@ -3,3 +3,5 @@ from .user import (
     UserRead,
     UserAuth,
 )
+
+from .token import Token

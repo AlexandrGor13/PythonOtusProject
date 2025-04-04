@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Form, status, Depends
+from fastapi import APIRouter, Body, status, Depends
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
@@ -14,7 +14,7 @@ from app.services.user import (
     update_user,
 )
 
-from app.dependency import get_user_from_token
+from app.dependency import get_current_user
 
 DEFAULT_STR = ""
 DEFAULT_EMAIL = "***@***.***"
@@ -52,7 +52,7 @@ router = APIRouter(tags=["Users"], prefix="/api/users")
         },
     },
 )
-def set_user(user_in: Annotated[UserSchema, Form()]):
+def set_user(user_in: Annotated[UserSchema, Body()]):
     try:
         user = create_user(**user_in.__dict__)
     except InterfaceError:
@@ -104,7 +104,7 @@ def set_user(user_in: Annotated[UserSchema, Form()]):
         },
     },
 )
-def about_me(current_user: Annotated[str, Depends(get_user_from_token)]):
+def about_me(current_user: Annotated[str, Depends(get_current_user)]):
     """
     Этот маршрут защищен и требует токен. Если токен действителен, мы возвращаем информацию о пользователе.
     """
@@ -159,11 +159,11 @@ def about_me(current_user: Annotated[str, Depends(get_user_from_token)]):
     },
 )
 def update_user_info(
-    current_user: Annotated[str, Depends(get_user_from_token)],
-    first_name: str = Form(default=DEFAULT_STR),
-    last_name: str = Form(default=DEFAULT_STR),
-    email: str = Form(default=DEFAULT_EMAIL),
-    phone: str = Form(default=DEFAULT_PHONE),
+    current_user: Annotated[str, Depends(get_current_user)],
+    first_name: str = Body(default=DEFAULT_STR),
+    last_name: str = Body(default=DEFAULT_STR),
+    email: str = Body(default=DEFAULT_EMAIL),
+    phone: str = Body(default=DEFAULT_PHONE),
 ):
     try:
         data = {"username": current_user}
@@ -175,6 +175,7 @@ def update_user_info(
             data["email"] = email
         if phone != DEFAULT_PHONE:
             data["phone"] = phone
+            print(data)
         user = update_user(**data)
     except NoResultFound:
         return JSONResponse(
@@ -224,7 +225,7 @@ def update_user_info(
         },
     },
 )
-def del_user(current_user: Annotated[str, Depends(get_user_from_token)]):
+def del_user(current_user: Annotated[str, Depends(get_current_user)]):
     try:
         user = delete_user(current_user)
     except NoResultFound:
