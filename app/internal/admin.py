@@ -1,10 +1,10 @@
 from sqladmin import Admin, ModelView
 from sqladmin.authentication import AuthenticationBackend
 from fastapi.requests import Request
-import secrets
+import uuid
 from app.routers import router
 from app.core.config import settings
-from app.core.security import pwd_context
+from app.core.security import verify_password, verify_string
 from app.models import *
 
 
@@ -53,12 +53,12 @@ class AdminAuth(AuthenticationBackend):
         form = await request.form()
         username, password = form["username"], form["password"]
 
-        is_user_ok = secrets.compare_digest(username, settings.APP_ADMIN)
-        is_pass_ok = pwd_context.verify(password, settings.APP_PASSWORD)
+        is_user_ok = verify_string(username, settings.APP_ADMIN)
+        is_pass_ok = verify_password(password, settings.APP_PASSWORD)
         if not (is_user_ok and is_pass_ok):
             return False
         # And update session
-        request.session.update({"token": "..."})
+        request.session.update({"token": str(uuid.uuid4())})
 
         return True
 
@@ -77,4 +77,4 @@ class AdminAuth(AuthenticationBackend):
         return True
 
 
-authentication_backend = AdminAuth(secret_key="...")
+authentication_backend = AdminAuth(secret_key=str(uuid.uuid4()))
