@@ -1,7 +1,8 @@
 __all__ = (
     "Base",
-    "engine",
-    "inspector",
+    "async_engine",
+    # "engine",
+    # "inspector",
     "User",
     "Address",
     "Product",
@@ -9,7 +10,8 @@ __all__ = (
     "OrderItem",
 )
 
-from .base import Base, engine, inspector
+from .base import Base, async_engine
+#, inspector, engine
 from .user import User
 from .address import Address
 from .product import Product

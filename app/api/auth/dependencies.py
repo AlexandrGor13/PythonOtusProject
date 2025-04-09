@@ -8,9 +8,10 @@ from fastapi.security import (
     OAuth2PasswordRequestForm,
 )
 from app.core.config import settings
-from app.services.user import select_user_password
 from app.core.security import verify_password, verify_string
 from app.schemas import UserAuth
+from app.api.users.crud import UsersCRUD
+from app.api.users.dependencies import users_crud
 
 
 security_basic = HTTPBasic()
@@ -33,12 +34,15 @@ def auth_admin(credentials: HTTPBasicCredentials = Depends(security_basic)):
     return {"username": settings.APP_ADMIN, "password": settings.APP_PASSWORD}
 
 
-def auth_user(credentials: HTTPBasicCredentials = Depends(security_basic)):
+async def auth_user(
+    credentials: Annotated[HTTPBasicCredentials,  Depends(security_basic)],
+    crud: Annotated[UsersCRUD, Depends(users_crud)],
+):
     """
     Функция для извлечения информации о пользователе из HTTPBasic авторизации.
     Проверяем логин и пароль пользователя.
     """
-    items = list(map(lambda us: UserAuth(**us), select_user_password()))
+    items = list(map(lambda us: UserAuth(**us), await crud.get_users_and_password()))
     for item in items:
         is_user_ok = verify_string(credentials.username, item.username)
         is_pass_ok = verify_password(credentials.password, item.password_hash)
@@ -52,12 +56,15 @@ def auth_user(credentials: HTTPBasicCredentials = Depends(security_basic)):
         )
 
 
-def auth_user_oath2(credentials: Annotated[OAuth2PasswordRequestForm, Depends()]):
+async def auth_user_oath2(
+        credentials: Annotated[OAuth2PasswordRequestForm, Depends()],
+        crud: Annotated[UsersCRUD, Depends(users_crud)],
+):
     """
     Функция для извлечения информации о пользователе из OAuth2PasswordBearer авторизации.
     Проверяем логин и пароль пользователя.
     """
-    items = list(map(lambda us: UserAuth(**us), select_user_password()))
+    items = list(map(lambda us: UserAuth(**us), await crud.get_users_and_password()))
     for item in items:
         is_user_ok = verify_string(credentials.username, item.username)
         is_pass_ok = verify_password(credentials.password, item.password_hash)
