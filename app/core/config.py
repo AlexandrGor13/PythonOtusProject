@@ -16,9 +16,10 @@ class Settings:
     PG_HOST = os.getenv("PG_HOST")
     PG_PORT = os.getenv("PG_PORT")
 
-
-    SQLA_PG_ENGINE = "asyncpg"
+    SQLA_PG_ENGINE = "pg8000"
     SQLA_PG_URL = f"postgresql+{SQLA_PG_ENGINE}://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DB}"
+    SQLA_PG_ASYNC_ENGINE = "asyncpg"
+    SQLA_PG_ASYNC_URL = f"postgresql+{SQLA_PG_ASYNC_ENGINE}://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DB}"
     SQLA_ECHO = True
     SQLA_POOL_SIZE = 50
     SQLA_MAX_OVERFLOW = 0

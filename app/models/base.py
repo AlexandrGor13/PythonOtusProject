@@ -18,14 +18,18 @@ from sqlalchemy.orm import (
 )
 
 async_engine = create_async_engine(
-    settings.SQLA_PG_URL,
+    settings.SQLA_PG_ASYNC_URL,
     echo=settings.SQLA_ECHO,
     pool_size=settings.SQLA_POOL_SIZE,
     max_overflow=settings.SQLA_MAX_OVERFLOW,
 )
 
-# async_engine = create_engine(settings.SQLA_PG_URL)
-# inspector = inspect(engine)
+engine = create_engine(
+    settings.SQLA_PG_URL,
+    echo=settings.SQLA_ECHO,
+    pool_size=settings.SQLA_POOL_SIZE,
+    max_overflow=settings.SQLA_MAX_OVERFLOW,)
+inspector = inspect(engine)
 
 async_session = async_sessionmaker(
     bind=async_engine,
