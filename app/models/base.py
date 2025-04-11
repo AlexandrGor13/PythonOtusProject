@@ -1,7 +1,6 @@
 from datetime import datetime
-from decimal import Decimal
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from app.core.config import settings
+from app.config import settings
 
 from sqlalchemy import (
     MetaData,
@@ -17,18 +16,20 @@ from sqlalchemy.orm import (
     mapped_column,
 )
 
+
 async_engine = create_async_engine(
-    settings.SQLA_PG_ASYNC_URL,
-    echo=settings.SQLA_ECHO,
-    pool_size=settings.SQLA_POOL_SIZE,
-    max_overflow=settings.SQLA_MAX_OVERFLOW,
+    url=settings.db.async_url,
+    echo=settings.db.echo,
+    pool_size=settings.db.pool_size,
+    max_overflow=settings.db.max_overflow,
 )
 
 engine = create_engine(
-    settings.SQLA_PG_URL,
-    echo=settings.SQLA_ECHO,
-    pool_size=settings.SQLA_POOL_SIZE,
-    max_overflow=settings.SQLA_MAX_OVERFLOW,)
+    url=settings.db.sync_url,
+    echo=settings.db.echo,
+    pool_size=settings.db.pool_size,
+    max_overflow=settings.db.max_overflow,
+)
 inspector = inspect(engine)
 
 async_session = async_sessionmaker(
@@ -39,7 +40,7 @@ async_session = async_sessionmaker(
 
 class Base(DeclarativeBase):
     metadata = MetaData(
-        naming_convention=settings.SQLA_NAMING_CONVENTION,
+        naming_convention=settings.db.naming_convention,
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

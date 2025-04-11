@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from app.core.config import settings
+from app.config import settings
 from app.models import Base
 
 
@@ -28,7 +28,7 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-config.set_main_option("sqlalchemy.url", settings.SQLA_PG_URL)
+config.set_main_option("sqlalchemy.url", settings.db.async_url)
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.

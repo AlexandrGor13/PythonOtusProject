@@ -1,13 +1,13 @@
 from typing import Annotated
 from jose import jwt, JWTError, ExpiredSignatureError
-from fastapi import Depends, status, HTTPException, APIRouter
+from fastapi import Depends, status, HTTPException
 from fastapi.security import (
     HTTPBasic,
     HTTPBasicCredentials,
     OAuth2PasswordBearer,
     OAuth2PasswordRequestForm,
 )
-from app.core.config import settings
+from app.config import settings
 from app.core.security import verify_password, verify_string
 from app.schemas import UserAuth
 from app.api.users.crud import UsersCRUD
@@ -81,7 +81,7 @@ async def auth_user_oath2(
 def get_current_user(credentials: Annotated[str, Depends(oauth2_scheme)]):
     """Получение текущего пользователя из токена"""
     try:
-        payload = jwt.decode(credentials, settings.SECRET_KEY)
+        payload = jwt.decode(credentials, settings.api.secret_key)
         username: str = payload.get("sub")
         if username is None:
             raise HTTPException(

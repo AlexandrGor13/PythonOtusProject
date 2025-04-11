@@ -1,1 +1,1 @@
-from .admin import create_admin
+from .admin import create_admin_panel

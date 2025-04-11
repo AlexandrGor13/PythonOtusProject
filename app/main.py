@@ -1,21 +1,14 @@
 from fastapi import FastAPI
 
-import uvicorn
-
-from app.api import router
-from app.internal.admin import create_admin
-
-app = FastAPI()
-
-app.include_router(router)
-create_admin(app)
+from app.api import router as api_router
+from app.internal.admin import create_admin_panel
+from app.create_fastapi_app import create_app
 
 
-if __name__ == "__main__":
-    from dotenv import load_dotenv
-    import pathlib
+app: FastAPI = create_app(
+    create_custom_static_urls=True,
+)
 
-    path_env = pathlib.Path(__file__).parents[-1] / ".env"
-    load_dotenv(path_env)
+app.include_router(api_router)
+create_admin_panel(app)
 
-    uvicorn.run("main:app", reload=True)

@@ -4,12 +4,12 @@ from sqladmin.authentication import AuthenticationBackend
 from fastapi.requests import Request
 import uuid
 from app.api import router
-from app.core.config import settings
+from app.config import settings
 from app.core.security import verify_password, verify_string
 from app.models import *
 
 
-def create_admin(app: FastAPI):
+def create_admin_panel(app: FastAPI):
     app.include_router(router)
     admin = Admin(app, async_engine, authentication_backend=authentication_backend)
     admin.add_view(UserAdmin)
@@ -53,9 +53,10 @@ class AdminAuth(AuthenticationBackend):
     async def login(self, request: Request) -> bool:
         form = await request.form()
         username, password = form["username"], form["password"]
-
-        is_user_ok = verify_string(username, settings.APP_ADMIN)
-        is_pass_ok = verify_password(password, settings.APP_PASSWORD)
+        print(username, settings.admin.user)
+        print(password, settings.admin.password)
+        is_user_ok = verify_string(username, settings.admin.user)
+        is_pass_ok = verify_string(password, settings.admin.password)
         if not (is_user_ok and is_pass_ok):
             return False
         # And update session
