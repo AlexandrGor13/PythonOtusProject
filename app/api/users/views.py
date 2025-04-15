@@ -6,11 +6,11 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.exc import NoResultFound, InterfaceError, IntegrityError
 
 
-from app.schemas import User as UserSchema
+from schemas import User as UserSchema
 from .crud import UsersCRUD
 from .dependencies import users_crud
 
-from app.api.auth.dependencies import get_current_user
+from ..auth.dependencies import get_current_user
 
 DEFAULT_STR = ""
 DEFAULT_EMAIL = "***@***.***"

@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 
-from app.api import router as api_router
-from app.create_fastapi_app import create_app
-from app.internal.admin import create_admin_panel
+from api import router as api_router
+from create_fastapi_app import create_app
+from internal.admin import create_admin_panel
 
 
 app: FastAPI = create_app(

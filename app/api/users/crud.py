@@ -4,15 +4,16 @@ Read
 Update
 Delete
 """
+import logging
 
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.user import UserRead, User as UserSchema
-from app.models import (
+from core.security import get_password_hash
+from schemas.user import UserRead, User as UserSchema
+from models import (
     async_engine,
     User,
 )
-
 
 class UsersCRUD:
     def __init__(self, session: AsyncSession):
@@ -20,7 +21,7 @@ class UsersCRUD:
 
     async def create(self, user_in: UserSchema) -> UserRead:
         params = user_in.model_dump()
-        params['password_hash'] = params.pop('password')
+        params['password_hash'] = get_password_hash(params.pop('password'))
         user = User(**params)
         self.session.add(user)
         user_out = user.get_schemas_user

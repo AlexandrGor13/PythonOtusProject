@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from app.config import settings
+from config import settings
 
 from sqlalchemy import (
     MetaData,

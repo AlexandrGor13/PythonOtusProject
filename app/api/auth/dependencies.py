@@ -7,11 +7,11 @@ from fastapi.security import (
     OAuth2PasswordBearer,
     OAuth2PasswordRequestForm,
 )
-from app.config import settings
-from app.core.security import verify_password, verify_string
-from app.schemas import UserAuth
-from app.api.users.crud import UsersCRUD
-from app.api.users.dependencies import users_crud
+from config import settings
+from core.security import verify_password, verify_string
+from schemas import UserAuth
+from api.users.crud import UsersCRUD
+from api.users.dependencies import users_crud
 
 
 security_basic = HTTPBasic()

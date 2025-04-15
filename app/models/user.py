@@ -10,7 +10,7 @@ from sqlalchemy.orm import (
 )
 
 from .base import Base
-from app.schemas.user import UserRead
+from schemas.user import UserRead
 
 if TYPE_CHECKING:
     from .order import Order

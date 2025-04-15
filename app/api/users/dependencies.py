@@ -5,7 +5,7 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .crud import UsersCRUD
-from app.models.base import async_session
+from models.base import async_session
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession]:

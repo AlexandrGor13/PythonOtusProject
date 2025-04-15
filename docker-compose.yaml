@@ -26,11 +26,11 @@ services:
                -c checkpoint_completion_target=0.7
                -c wal_buffers=16MB
                -c default_statistics_target=100
-#    healthcheck:
-#      test: [ "CMD", "pg_isready -U $${APP_CONFIG__DB__USER} -d $${APP_CONFIG__DB__NAME}" ]
-#      interval: 5s
-#      timeout: 5s
-#      retries: 3
+    healthcheck:
+      test: [ "CMD", "pg_isready -U $${APP_CONFIG__DB__USER} -d $${APP_CONFIG__DB__NAME}" ]
+      interval: 1s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
     tty: true
     stdin_open: true
@@ -56,9 +56,9 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - pg
-#      pg:
-#        condition: service_healthy
+#      - pg
+      pg:
+        condition: service_healthy
 
 volumes:
   postgresdata:

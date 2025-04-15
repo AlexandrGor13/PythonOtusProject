@@ -4,7 +4,7 @@ import bcrypt
 import secrets
 from passlib.context import CryptContext
 
-from app.config import settings
+from config import settings
 
 if not hasattr(bcrypt, "__about__"):
     bcrypt.__about__ = type("about", (object,), {"__version__": bcrypt.__version__})

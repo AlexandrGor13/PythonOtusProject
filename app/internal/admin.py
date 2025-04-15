@@ -3,10 +3,10 @@ from sqladmin import Admin, ModelView
 from sqladmin.authentication import AuthenticationBackend
 from fastapi.requests import Request
 import uuid
-from app.api import router
-from app.config import settings
-from app.core.security import verify_password, verify_string
-from app.models import (
+from api import router
+from config import settings
+from core.security import verify_password, verify_string
+from models import (
     User,
     Order,
     Product,
