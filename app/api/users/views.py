@@ -5,6 +5,7 @@ from fastapi.encoders import jsonable_encoder
 
 from sqlalchemy.exc import NoResultFound, InterfaceError, IntegrityError
 
+
 from app.schemas import User as UserSchema
 from .crud import UsersCRUD
 from .dependencies import users_crud
@@ -47,7 +48,7 @@ router = APIRouter(tags=["Users"], prefix="/users")
         },
     },
 )
-def set_user(
+async def set_user(
     user_in: Annotated[UserSchema, Body()],
     crud: Annotated[UsersCRUD, Depends(users_crud)],
 ):
@@ -55,7 +56,7 @@ def set_user(
     Создание нового пользователя
     """
     try:
-        user = crud.create(**user_in.__dict__)
+        user = await crud.create(user_in)
     except InterfaceError:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -66,12 +67,10 @@ def set_user(
             status_code=status.HTTP_409_CONFLICT,
             content={"detail": "User already exists"},
         )
-    return JSONResponse(
-        content={
+    return {
             "description": "User created",
-            "user info": jsonable_encoder(user),
+            "user info": user,
         }
-    )
 
 
 @router.get(

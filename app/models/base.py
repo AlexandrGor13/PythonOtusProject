@@ -7,8 +7,6 @@ from sqlalchemy import (
     Integer,
     func,
     TIMESTAMP,
-    inspect,
-    create_engine,
 )
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -23,14 +21,6 @@ async_engine = create_async_engine(
     pool_size=settings.db.pool_size,
     max_overflow=settings.db.max_overflow,
 )
-
-engine = create_engine(
-    url=settings.db.sync_url,
-    echo=settings.db.echo,
-    pool_size=settings.db.pool_size,
-    max_overflow=settings.db.max_overflow,
-)
-inspector = inspect(engine)
 
 async_session = async_sessionmaker(
     bind=async_engine,

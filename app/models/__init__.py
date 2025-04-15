@@ -1,18 +1,17 @@
 __all__ = (
     "Base",
     "async_engine",
-    "engine",
-    "inspector",
     "User",
-    "Address",
-    "Product",
     "Order",
+    "Product",
     "OrderItem",
+    "Address",
 )
 
-from .base import Base, async_engine, inspector, engine
+from .base import Base, async_engine
 from .user import User
-from .address import Address
-from .product import Product
 from .order import Order
+from .product import Product
 from .order_items import OrderItem
+from .address import Address
+

@@ -1,26 +1,22 @@
-[tool.poetry]
+[project]
 name = "otusproject"
 version = "0.1.0"
-description = ""
-authors = ["alexandr <gorbenich@gmail.com>"]
+description = "Add your description here"
 readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.15.2",
+    "asyncpg>=0.30.0",
+    "fastapi[all]>=0.115.12",
+    "gunicorn>=23.0.0",
+    "passlib[bcrypt]>=1.7.4",
+    "pydantic-settings>=2.8.1",
+    "python-jose>=3.4.0",
+    "sqladmin[full]>=0.20.1",
+    "sqlalchemy[asyncio]>=2.0.40",
+]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-fastapi = { extras = ["all"], version = "^0.115.11" }
-alembic = "^1.15.1"
-pg8000 = "^1.31.2"
-passlib = { extras = ["bcrypt"], version = "^1.7.4" }
-sqladmin = { extras = ["full"], version = "^0.20.1" }
-python-jose = "^3.4.0"
-sqlalchemy = { extras = ["asyncio"], version = "^2.0.40" }
-asyncpg = "^0.30.0"
-pydantic-settings = "^2.8.1"
-
-
-[tool.poetry.group.dev.dependencies]
-black = "^25.1.0"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+]

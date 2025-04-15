@@ -6,46 +6,63 @@ import uuid
 from app.api import router
 from app.config import settings
 from app.core.security import verify_password, verify_string
-from app.models import *
-
+from app.models import (
+    User,
+    Order,
+    Product,
+    OrderItem,
+    Address,
+    async_engine,
+)
 
 def create_admin_panel(app: FastAPI):
     app.include_router(router)
     admin = Admin(app, async_engine, authentication_backend=authentication_backend)
     admin.add_view(UserAdmin)
-    admin.add_view(ProductAdmin)
-    admin.add_view(OrderAdmin)
-    admin.add_view(OrderItemAdmin)
-    admin.add_view(AddressAdmin)
+    # admin.add_view(ProductAdmin)
+    # admin.add_view(OrderAdmin)
+    # admin.add_view(OrderItemAdmin)
+    # admin.add_view(AddressAdmin)
 
 
 class UserAdmin(ModelView, model=User):
+    # column_list = [
+    #     column["name"] for column in inspector.get_columns(User.__tablename__)
+    # ]
     column_list = [
-        column["name"] for column in inspector.get_columns(User.__tablename__)
+        User.id,
+        User.username,
+        User.first_name,
+        User.last_name,
+        User.email,
+        User.phone,
+        User.password_hash,
+        User.created_at,
+        User.updated_at,
     ]
 
 
 class OrderAdmin(ModelView, model=Order):
     column_list = [
-        column["name"] for column in inspector.get_columns(Order.__tablename__)
+        # column["name"] for column in inspector.get_columns(Order.__tablename__)
     ]
 
 
 class AddressAdmin(ModelView, model=Address):
     column_list = [
-        column["name"] for column in inspector.get_columns(Address.__tablename__)
+#         column["name"] for column in inspector.get_columns(Address.__tablename__)
     ]
 
 
 class ProductAdmin(ModelView, model=Product):
     column_list = [
-        column["name"] for column in inspector.get_columns(Product.__tablename__)
+#         column["name"] for column in inspector.get_columns(Product.__tablename__)
     ]
 
 
 class OrderItemAdmin(ModelView, model=OrderItem):
     column_list = [
-        column["name"] for column in inspector.get_columns(OrderItem.__tablename__)
+#         column["name"] for column in inspector.get_columns(OrderItem.__tablename__)
     ]
 
 

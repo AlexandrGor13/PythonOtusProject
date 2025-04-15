@@ -23,7 +23,7 @@ class User(Base):
     username: Mapped[str] = mapped_column(
         String(15),
         unique=True
-    )    
+    )
     password_hash: Mapped[str | None] = mapped_column(
         String(256),
         default=None,
@@ -63,7 +63,7 @@ class User(Base):
             email=self.email,
             phone=self.phone,
         )
-        
+
     @property
     def get_username_password(self) -> dict:
         return {'username': self.username, 'password_hash': self.password_hash}

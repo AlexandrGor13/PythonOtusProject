@@ -6,7 +6,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent
 
-SQLA_PG_SYNC_ENGINE = "pg8000"
 SQLA_PG_ASYNC_ENGINE = "asyncpg"
 
 
@@ -55,10 +54,6 @@ class DatabaseConfig(BaseModel):
             f"postgresql+{engine}://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
         )
         return dsn.encoded_string()
-
-    @property
-    def sync_url(self) -> str:
-        return self.create_pg_url(SQLA_PG_SYNC_ENGINE)
 
     @property
     def async_url(self) -> str:

@@ -8,14 +8,9 @@ Delete
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.user import UserRead, User as UserSchema
-from app.core.security import get_password_hash
 from app.models import (
     async_engine,
     User,
-    Product,
-    Order,
-    OrderItem,
-    Address,
 )
 
 

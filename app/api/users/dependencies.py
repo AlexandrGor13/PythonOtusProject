@@ -1,17 +1,11 @@
 from collections.abc import AsyncGenerator
 from typing import Annotated
 
-from fastapi import Header, HTTPException, status, Depends
-from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
-
-from sqlalchemy.exc import NoResultFound, InterfaceError, IntegrityError
+from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .crud import UsersCRUD
-from app.models import User
 from app.models.base import async_session
-from ...schemas import UserRead
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession]:
