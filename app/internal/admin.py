@@ -19,59 +19,36 @@ def create_admin_panel(app: FastAPI):
     app.include_router(router)
     admin = Admin(app, async_engine, authentication_backend=authentication_backend)
     admin.add_view(UserAdmin)
-    # admin.add_view(ProductAdmin)
-    # admin.add_view(OrderAdmin)
-    # admin.add_view(OrderItemAdmin)
-    # admin.add_view(AddressAdmin)
+    admin.add_view(ProductAdmin)
+    admin.add_view(OrderAdmin)
+    admin.add_view(OrderItemAdmin)
+    admin.add_view(AddressAdmin)
 
 
 class UserAdmin(ModelView, model=User):
-    # column_list = [
-    #     column["name"] for column in inspector.get_columns(User.__tablename__)
-    # ]
-    column_list = [
-        User.id,
-        User.username,
-        User.first_name,
-        User.last_name,
-        User.email,
-        User.phone,
-        User.password_hash,
-        User.created_at,
-        User.updated_at,
-    ]
+    column_list = User.get_columns()
 
 
 class OrderAdmin(ModelView, model=Order):
-    column_list = [
-        # column["name"] for column in inspector.get_columns(Order.__tablename__)
-    ]
+    column_list = Order.get_columns()
 
 
 class AddressAdmin(ModelView, model=Address):
-    column_list = [
-#         column["name"] for column in inspector.get_columns(Address.__tablename__)
-    ]
+    column_list = Address.get_columns()
 
 
 class ProductAdmin(ModelView, model=Product):
-    column_list = [
-#         column["name"] for column in inspector.get_columns(Product.__tablename__)
-    ]
+    column_list = Product.get_columns()
 
 
 class OrderItemAdmin(ModelView, model=OrderItem):
-    column_list = [
-#         column["name"] for column in inspector.get_columns(OrderItem.__tablename__)
-    ]
+    column_list = OrderItem.get_columns()
 
 
 class AdminAuth(AuthenticationBackend):
     async def login(self, request: Request) -> bool:
         form = await request.form()
         username, password = form["username"], form["password"]
-        print(username, settings.admin.user)
-        print(password, settings.admin.password)
         is_user_ok = verify_string(username, settings.admin.user)
         is_pass_ok = verify_string(password, settings.admin.password)
         if not (is_user_ok and is_pass_ok):

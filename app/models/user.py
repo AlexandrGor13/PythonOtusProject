@@ -20,10 +20,7 @@ if TYPE_CHECKING:
 class User(Base):
     __tablename__ = "users"
 
-    username: Mapped[str] = mapped_column(
-        String(15),
-        unique=True
-    )
+    username: Mapped[str] = mapped_column(String(15), unique=True)
     password_hash: Mapped[str | None] = mapped_column(
         String(256),
         default=None,
@@ -36,10 +33,7 @@ class User(Base):
         String(50),
         default="",
     )
-    email: Mapped[str] = mapped_column(
-        String(30),
-        unique=True
-    )
+    email: Mapped[str] = mapped_column(String(30), unique=True)
     phone: Mapped[str] = mapped_column(
         String(15),
         default="",
@@ -66,4 +60,6 @@ class User(Base):
 
     @property
     def get_username_password(self) -> dict:
-        return {'username': self.username, 'password_hash': self.password_hash}
+        return {"username": self.username, "password_hash": self.password_hash}
+
+

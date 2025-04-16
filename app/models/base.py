@@ -39,28 +39,14 @@ class Base(DeclarativeBase):
         TIMESTAMP, server_default=func.now(), onupdate=func.now()
     )
 
-    # def to_dict(self, exclude_none: bool = False):
-    #     """
-    #     Преобразует объект модели в словарь.
-    #
-    #     Args:
-    #         exclude_none (bool): Исключать ли None значения из результата
-    #
-    #     Returns:
-    #         dict: Словарь с данными объекта
-    #     """
-    #     result = {}
-    #     for column in inspect(self.__class__).columns:
-    #         value = getattr(self, column.key)
-    #
-    #         # Преобразование специальных типов данных
-    #         if isinstance(value, datetime):
-    #             value = value.isoformat()
-    #         elif isinstance(value, Decimal):
-    #             value = float(value)
-    #
-    #         # Добавляем значение в результат
-    #         if not exclude_none or value is not None:
-    #             result[column.key] = value
-    #
-    #     return result
+    @classmethod
+    def get_columns(cls):
+        lst_columns = [
+            item
+            for item in cls.__dict__.keys()
+            if not (item[:2] == item[-2:] and item[:2] == "__")
+               and not item.startswith("get")
+               and not item.find("class") >= 0
+        ]
+        lst_columns.insert(0, lst_columns.pop(-3))
+        return lst_columns
