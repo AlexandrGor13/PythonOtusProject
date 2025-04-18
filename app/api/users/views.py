@@ -5,18 +5,13 @@ from fastapi.encoders import jsonable_encoder
 
 from sqlalchemy.exc import NoResultFound, InterfaceError, IntegrityError
 
-
-from schemas import User as UserSchema
 from .crud import UsersCRUD
-from .dependencies import users_crud
+from .schemas import User as UserSchema, default_user
+from ..dependencies import users_crud, get_current_user
 
-from ..auth.dependencies import get_current_user
 
-DEFAULT_STR = ""
-DEFAULT_EMAIL = "***@***.***"
-DEFAULT_PHONE = "+7**********"
 
-router = APIRouter(tags=["Users"], prefix="/users")
+router = APIRouter(tags=["Users"], prefix="/api/users")
 
 
 @router.post(
@@ -32,11 +27,7 @@ router = APIRouter(tags=["Users"], prefix="/users")
                         "detail": "User created",
                         "user info": {
                             "username": "string",
-                            "first_name": "",
-                            "last_name": "",
                             "email": "user@example.com",
-                            "phone": "string",
-                            "password": "stringst",
                         },
                     }
                 }
@@ -49,8 +40,8 @@ router = APIRouter(tags=["Users"], prefix="/users")
     },
 )
 async def set_user(
-    user_in: Annotated[UserSchema, Body()],
     crud: Annotated[UsersCRUD, Depends(users_crud)],
+    user_in: Annotated[UserSchema, Body()] = default_user,
 ):
     """
     Создание нового пользователя
@@ -68,9 +59,9 @@ async def set_user(
             content={"detail": "User already exists"},
         )
     return {
-            "description": "User created",
-            "user info": user,
-        }
+        "description": "User created",
+        "user info": user,
+    }
 
 
 @router.get(
@@ -86,11 +77,7 @@ async def set_user(
                         "detail": "User info",
                         "user info": {
                             "username": "string",
-                            "first_name": "",
-                            "last_name": "",
                             "email": "user@example.com",
-                            "phone": "string",
-                            "password": "stringst",
                         },
                     }
                 }
@@ -105,8 +92,8 @@ async def set_user(
     },
 )
 async def about_me(
-        current_user: Annotated[str, Depends(get_current_user)],
-        crud: Annotated[UsersCRUD, Depends(users_crud)],
+    current_user: Annotated[str, Depends(get_current_user)],
+    crud: Annotated[UsersCRUD, Depends(users_crud)],
 ):
     """
     Этот маршрут защищен и требует токен. Если токен действителен, мы возвращаем информацию о пользователе.
@@ -123,33 +110,9 @@ async def about_me(
             content={"detail": "Server Error"},
         )
     return {
-            "description": "User info",
-            "user info": user,
-        }
-
-
-@router.get(
-    "/all_users",
-    status_code=status.HTTP_200_OK,
-)
-async def all_users(
-        crud: Annotated[UsersCRUD, Depends(users_crud)],
-):
-    """
-    Этот маршрут защищен и требует токен. Если токен действителен, мы возвращаем информацию о пользователе.
-    """
-    try:
-        users = await crud.get()
-    except NoResultFound:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND, content={"detail": "User not found"}
-        )
-    except InterfaceError:
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": "Server Error"},
-        )
-    return users
+        "description": "User info",
+        "user info": user,
+    }
 
 
 @router.put(
@@ -165,11 +128,7 @@ async def all_users(
                         "detail": "User updated",
                         "user info": {
                             "username": "string",
-                            "first_name": "",
-                            "last_name": "",
                             "email": "user@example.com",
-                            "phone": "string",
-                            "password": "stringst",
                         },
                     }
                 }
@@ -186,25 +145,13 @@ async def all_users(
 async def update_user_info(
     current_user: Annotated[str, Depends(get_current_user)],
     crud: Annotated[UsersCRUD, Depends(users_crud)],
-    first_name: str = Body(default=DEFAULT_STR),
-    last_name: str = Body(default=DEFAULT_STR),
-    email: str = Body(default=DEFAULT_EMAIL),
-    phone: str = Body(default=DEFAULT_PHONE),
+    user_in: Annotated[UserSchema, Body()] = default_user,
 ):
     """
     Этот маршрут защищен и требует токен. Если токен действителен, мы можем изменить информацию о пользователе.
     """
     try:
-        data = {"username": current_user}
-        if first_name != DEFAULT_STR:
-            data["first_name"] = first_name
-        if last_name != DEFAULT_STR:
-            data["last_name"] = last_name
-        if email != DEFAULT_EMAIL:
-            data["email"] = email
-        if phone != DEFAULT_PHONE:
-            data["phone"] = phone
-        user = await crud.update(**data)
+        user = await crud.update(current_user, user_in)
     except NoResultFound:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND, content={"detail": "User not found"}
@@ -215,10 +162,9 @@ async def update_user_info(
             content={"detail": "Server Error"},
         )
     return {
-            "description": "User updated",
-            "user info": user,
-        }
-
+        "description": "User updated",
+        "user info": user,
+    }
 
 
 @router.delete(
@@ -234,11 +180,7 @@ async def update_user_info(
                         "detail": "User deleted",
                         "user info": {
                             "username": "string",
-                            "first_name": "",
-                            "last_name": "",
                             "email": "user@example.com",
-                            "phone": "string",
-                            "password": "stringst",
                         },
                     }
                 }
@@ -276,3 +218,26 @@ async def del_user(
             "user info": jsonable_encoder(user),
         }
     )
+
+@router.get(
+    "/all_users",
+    status_code=status.HTTP_200_OK,
+)
+async def all_users(
+    crud: Annotated[UsersCRUD, Depends(users_crud)],
+):
+    """
+    Этот маршрут защищен и требует токен. Если токен действителен, мы возвращаем информацию о пользователе.
+    """
+    try:
+        users = await crud.get()
+    except NoResultFound:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND, content={"detail": "User not found"}
+        )
+    except InterfaceError:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": "Server Error"},
+        )
+    return users

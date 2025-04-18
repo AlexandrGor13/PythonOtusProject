@@ -3,7 +3,6 @@ from jose import jwt
 import bcrypt
 import secrets
 from passlib.context import CryptContext
-
 from config import settings
 
 if not hasattr(bcrypt, "__about__"):

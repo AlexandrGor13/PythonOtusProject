@@ -5,13 +5,14 @@ from fastapi.requests import Request
 import uuid
 from api import router
 from config import settings
-from core.security import verify_password, verify_string
+from core.security import verify_string
 from models import (
     User,
     Order,
     Product,
     OrderItem,
     Address,
+    Profile,
     async_engine,
 )
 
@@ -23,6 +24,7 @@ def create_admin_panel(app: FastAPI):
     admin.add_view(OrderAdmin)
     admin.add_view(OrderItemAdmin)
     admin.add_view(AddressAdmin)
+    admin.add_view(ProfileAdmin)
 
 
 class UserAdmin(ModelView, model=User):
@@ -43,6 +45,9 @@ class ProductAdmin(ModelView, model=Product):
 
 class OrderItemAdmin(ModelView, model=OrderItem):
     column_list = OrderItem.get_columns()
+
+class ProfileAdmin(ModelView, model=Profile):
+    column_list = Profile.get_columns()
 
 
 class AdminAuth(AuthenticationBackend):

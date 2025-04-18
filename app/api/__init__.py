@@ -1,11 +1,12 @@
-from fastapi import APIRouter
-from .users.views import router as user_router
+from .login import router as login_router
 from .root import router as root_router
-from .auth.login import router as login_router
+from .users.views import router as users_router
+from .dependencies import users_crud
 
-router = APIRouter(prefix="/api")
+from fastapi import APIRouter
 
+router = APIRouter( )
 
-router.include_router(root_router)
 router.include_router(login_router)
-router.include_router(user_router)
+router.include_router(root_router)
+router.include_router(users_router)

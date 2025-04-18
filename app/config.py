@@ -64,11 +64,12 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         case_sensitive=False,
-        env_prefix="APP_CONFIG__",
         env_nested_delimiter="__",
         env_file=(
             BASE_DIR / ".env.template",
             BASE_DIR / ".env",
+            BASE_DIR / ".env.admin",
+            BASE_DIR / ".env.api",
         ),
     )
 

@@ -6,6 +6,7 @@ __all__ = (
     "Product",
     "OrderItem",
     "Address",
+    "Profile"
 )
 
 from .base import Base, async_engine
@@ -14,4 +15,5 @@ from .order import Order
 from .product import Product
 from .order_items import OrderItem
 from .address import Address
+from .profile import Profile
 

@@ -1,4 +1,6 @@
 .venv
 .env
 app/.env
+app/.env.admin
+app/.env.api
 app/run.sh

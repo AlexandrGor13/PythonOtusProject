@@ -1,10 +1,10 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
-from schemas.user import UserAuth
-from schemas.token import Token
+from .users.schemas import UserAuth
+from .token import Token
 from core.security import create_jwt_token
-from api.auth.dependencies import auth_user_oath2
+from .dependencies import auth_user_oath2
 
 router = APIRouter(tags=["Authentification"])
 
