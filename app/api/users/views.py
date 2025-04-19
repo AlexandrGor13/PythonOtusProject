@@ -1,15 +1,14 @@
 from typing import Annotated
 from fastapi import APIRouter, Body, status, Depends
 from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
 
 from sqlalchemy.exc import NoResultFound, InterfaceError, IntegrityError
 
-from .crud import UsersCRUD
+from .crud import UsersCRUD, users_crud
 from .schemas import User as UserSchema, default_user
-from ..dependencies import users_crud, get_current_user
-
-
+from ..dependencies import get_current_user
+from ..profiles.crud import ProfileCRUD, profile_crud
+from ..profiles.schemas import ProfileRead, default_profile
 
 router = APIRouter(tags=["Users"], prefix="/api/users")
 
@@ -40,14 +39,18 @@ router = APIRouter(tags=["Users"], prefix="/api/users")
     },
 )
 async def set_user(
-    crud: Annotated[UsersCRUD, Depends(users_crud)],
+    crud_user: Annotated[UsersCRUD, Depends(users_crud)],
+    crud_profile: Annotated[ProfileCRUD, Depends(profile_crud)],
     user_in: Annotated[UserSchema, Body()] = default_user,
+    profile_in: Annotated[ProfileRead, Body()] = default_profile ,
 ):
     """
     Создание нового пользователя
     """
     try:
-        user = await crud.create(user_in)
+        user = await crud_user.create(user_in)
+        user_id = await crud_user.get_id_by_name(user_in.username)
+        profile = await crud_profile.create(profile_in = profile_in, user_id=user_id)
     except InterfaceError:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -61,6 +64,7 @@ async def set_user(
     return {
         "description": "User created",
         "user info": user,
+        "profile": profile
     }
 
 
@@ -215,9 +219,10 @@ async def del_user(
     return JSONResponse(
         content={
             "detail": "User deleted",
-            "user info": jsonable_encoder(user),
+            "user info": user,
         }
     )
+
 
 @router.get(
     "/all_users",

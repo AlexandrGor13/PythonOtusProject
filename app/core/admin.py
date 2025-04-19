@@ -16,6 +16,7 @@ from models import (
     async_engine,
 )
 
+
 def create_admin_panel(app: FastAPI):
     app.include_router(router)
     admin = Admin(app, async_engine, authentication_backend=authentication_backend)
@@ -45,6 +46,7 @@ class ProductAdmin(ModelView, model=Product):
 
 class OrderItemAdmin(ModelView, model=OrderItem):
     column_list = OrderItem.get_columns()
+
 
 class ProfileAdmin(ModelView, model=Profile):
     column_list = Profile.get_columns()

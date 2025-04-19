@@ -1,4 +1,3 @@
-from collections.abc import AsyncGenerator
 from typing import Annotated
 from jose import jwt, JWTError, ExpiredSignatureError
 from fastapi import status, HTTPException
@@ -7,28 +6,15 @@ from fastapi.security import (
     OAuth2PasswordRequestForm,
 )
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.base import async_session
 from core.security import verify_password, verify_string
 from config import settings
 from .users.schemas import UserAuth
-from .users.crud import UsersCRUD
-
+from .users.crud import UsersCRUD, users_crud
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
-async def get_async_session() -> AsyncGenerator[AsyncSession]:
-    async with async_session() as session:
-        yield session
 
-def users_crud(
-    session: Annotated[
-        AsyncSession,
-        Depends(get_async_session),
-    ],
-) -> UsersCRUD:
-    return UsersCRUD(session)
 
 
 async def auth_user_oath2(

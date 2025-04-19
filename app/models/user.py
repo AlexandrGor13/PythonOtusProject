@@ -41,7 +41,7 @@ class User(Base):
         return f"{self.username}"
 
     @property
-    def get_schemas_user(self) -> dict[str, str]:
+    def get_schemas(self) -> dict[str, str]:
         return {
             "username": self.username,
             "email": self.email,
